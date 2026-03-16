@@ -1,21 +1,33 @@
 {
   "name": "@aira/product-core",
   "version": "1.0.0",
+  "description": "Reusable product module for Aira React Native apps",
   "main": "index.js",
   "types": "index.d.ts",
+  "author": "Karan Gulia",
+  "license": "ISC",
+  "files": [
+    "components",
+    "hooks",
+    "navigation",
+    "redux",
+    "screens",
+    "utils",
+    "helper",
+    "index.js",
+    "index.d.ts"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Karan Gulia",
-  "license": "ISC",
-  "description": "",
   "peerDependencies": {
-    "react": "^19.0.0",
-    "react-native": "^0.79.0",
-    "@react-navigation/native": "^7.1.6",
-    "@react-navigation/native-stack": "^7.3.10",
-    "react-redux": "^9.2.0",
-    "redux-persist": "^6.0.0",
-    "@reduxjs/toolkit": "^2.7.0"
-  }
+    "react": ">=18",
+    "react-native": ">=0.72",
+    "@react-navigation/native": ">=6",
+    "@react-navigation/native-stack": ">=6",
+    "react-redux": ">=8",
+    "redux-persist": ">=6",
+    "@reduxjs/toolkit": ">=1.9"
+  },
+  "sideEffects": false
 }
