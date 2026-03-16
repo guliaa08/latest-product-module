@@ -12,7 +12,6 @@
 // const Stack = createNativeStackNavigator();
 
 // const ProductNavigator = ({ authKey = "" }) => {
-//   console.log({authKey,authKey})
 //   return (
 //     <Stack.Navigator initialRouteName="ProductList">
 //       <Stack.Screen name="ProductList" options={{ title: "Products" }}>
@@ -60,10 +59,7 @@
 
 // export default ProductNavigator;
 
-import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useDispatch } from "react-redux";
-import { setAuthKey } from "../redux/auth/reducer";
 
 import ProductList from "../screens/ProductList";
 import ProductDetail from "../screens/ProductDetails";
@@ -71,27 +67,16 @@ import ProductsScan from "../screens/ProductsScan";
 import ProductsPerCategory from "../screens/ProductsPerCategory";
 import AllOsaRequests from "../screens/AllOsaRequests";
 import Scanner from "../screens/Scanner";
-import { changeTheme } from "../redux/theme/themeReducer";
 
 const Stack = createNativeStackNavigator();
 
 const ProductNavigator = ({ authKey = "", isDarkMode = false }) => {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (authKey) {
-      dispatch(setAuthKey(authKey));
-    }
-  }, [authKey]);
-
-  useEffect(() => {
-    dispatch(changeTheme(isDarkMode ? "dark" : "light"));
-  }, [isDarkMode]);
-
   return (
     <Stack.Navigator initialRouteName="ProductList">
       <Stack.Screen name="ProductList" options={{ title: "Products" }}>
-        {(props) => <ProductList {...props} />}
+        {(props) => (
+          <ProductList {...props} authKey={authKey} isDarkMode={isDarkMode} />
+        )}
       </Stack.Screen>
 
       <Stack.Screen name="ProductDetail" options={{ title: "Product Details" }}>

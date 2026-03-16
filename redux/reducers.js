@@ -1,15 +1,15 @@
 import { combineReducers } from "@reduxjs/toolkit";
-import productSlice from "./product/reducers";
-import userSlice from "./user/reducer";
-import themeSlice from "./theme/themeReducer";
-import osaSlice from "./osa/reducers";
-import authSlice from "./auth/reducer";
+import productAppProductSlice from "./product/reducers";
+import productAppUserSlice from "./user/reducer";
+import productAppThemeSlice from "./theme/themeReducer";
+import productAppOsaSlice from "./osa/reducers";
+import productAppAuthSlice from "./auth/reducer";
 const rootReducer = combineReducers({
-  product: productSlice,
-  user: userSlice,
-  theme: themeSlice,
-  osa: osaSlice,
-  auth: authSlice,
+  productAppProduct: productAppProductSlice,
+  productAppUser: productAppUserSlice,
+  productAppTheme: productAppThemeSlice,
+  productAppOsa: productAppOsaSlice,
+  productAppAuth: productAppAuthSlice,
 });
 
 export default rootReducer;

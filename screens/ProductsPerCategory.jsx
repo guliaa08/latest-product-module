@@ -24,7 +24,9 @@ export default function ProductsPerCategory({ route }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [checked, setChecked] = useState(false);
-  const { isLoadingUser, isValidUser } = useSelector((state) => state.user);
+  const { isLoadingUser, isValidUser } = useSelector(
+    (state) => state.productAppUser,
+  );
   const [osaRequests, setOsaRequests] = useState({});
 
   const {
@@ -32,7 +34,7 @@ export default function ProductsPerCategory({ route }) {
     categories: tempCategories,
     dashboardMetrics: tempDashboardMetrics,
     osaRequests: tempOsaRequests,
-  } = useSelector((state) => state.product);
+  } = useSelector((state) => state.productAppProduct);
 
   const dispatch = useDispatch();
   /* ---------------- VERIFY USER ---------------- */
@@ -52,15 +54,11 @@ export default function ProductsPerCategory({ route }) {
 
   useEffect(() => {
     if (tempDashboardMetrics) {
-      console.log("dashboard metrics", tempDashboardMetrics);
-
       setDashboardMetrics(tempDashboardMetrics);
-      // console.log('temp categories',tempCategories);
     }
   }, [tempDashboardMetrics]);
   useEffect(() => {
     if (tempOsaRequests) {
-      console.log("osa data", tempOsaRequests);
       setOsaRequests({ ...tempOsaRequests, total: 2 });
       setOsaRequests(tempOsaRequests);
     }
@@ -73,7 +71,6 @@ export default function ProductsPerCategory({ route }) {
         productImage:
           "https://img.freepik.com/premium-photo/top-view-white-sliced-toast-bread-white_711700-14041.jpg",
       }));
-      console.log("list of products", data);
 
       setProducts(data);
       setLoading(false);

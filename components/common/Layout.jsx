@@ -10,7 +10,7 @@ export const PageBody = ({
   refreshControl,
   ...props
 }) => {
-   const appColor = useSelector((state) => state?.theme?.appColor) || {};
+   const appColor = useSelector((state) => state?.productAppTheme?.appColor) || {};
   const Container = scrollable ? ScrollView : View;
 
   return (

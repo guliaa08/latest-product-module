@@ -1,7 +1,7 @@
-import { Keyboard } from 'react-native';
-import SubmitOsa from './osa/SubmitOsa';
-import AddQuantityModal from './osa/AddQuantityModal';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Keyboard } from "react-native";
+import SubmitOsa from "./osa/SubmitOsa";
+import AddQuantityModal from "./osa/AddQuantityModal";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import {
   View,
   Text,
@@ -12,42 +12,41 @@ import {
   Alert,
   Modal,
   BackHandler,
-} from 'react-native';
+} from "react-native";
 import React, {
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { PageBody } from '../components/common/Layout';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../components/common/molecules/Header';
-import OsaScanProduct from '../components/common/molecules/OsaScanProduct';
-import { useDispatch, useSelector } from 'react-redux';
-import { get_osaList, post_osaList } from '../redux/osa/action';
-import { useNavigation } from '@react-navigation/native';
+} from "react";
+import { PageBody } from "../components/common/Layout";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Header from "../components/common/molecules/Header";
+import OsaScanProduct from "../components/common/molecules/OsaScanProduct";
+import { useDispatch, useSelector } from "react-redux";
+import { get_osaList, post_osaList } from "../redux/osa/action";
+import { useNavigation } from "@react-navigation/native";
 import {
   addScannedDisplay,
   addScannedItem,
   resetExecution,
-} from '../redux/osa/reducers';
-import AddQuantity from '../components/common/molecules/AddQuantity';
-import FilterBottomSheet from '../components/common/molecules/FilterBottomSheet';
-import SortBottomSheet from '../components/common/molecules/SortBottomSheet';
-import Loader from '../components/common/atoms/Loader';
+} from "../redux/osa/reducers";
+import AddQuantity from "../components/common/molecules/AddQuantity";
+import FilterBottomSheet from "../components/common/molecules/FilterBottomSheet";
+import SortBottomSheet from "../components/common/molecules/SortBottomSheet";
+import Loader from "../components/common/atoms/Loader";
 
 export default function ProductsScan({ route }) {
-  console.log('item from prop', route.params.request);
   const { request } = route.params;
   const [open, setOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [filter, setFilter] = useState('both');
+  const [filter, setFilter] = useState("both");
   const [products, setProducts] = useState([]);
   const [osaRequests, setOsaRequests] = useState({ data: [] });
   const [selectedItem, setSelectedItem] = useState({});
-  const [enterQuantityWarning,setEnterQuantityWarning]= useState(false);
+  const [enterQuantityWarning, setEnterQuantityWarning] = useState(false);
   const [osaScanned, setOsaScanned] = useState({
     data: [],
   });
@@ -59,7 +58,9 @@ export default function ProductsScan({ route }) {
   const scannedMomentum = useRef(true);
 
   // user validation
-  const { isLoadingUser, isValidUser } = useSelector(state => state.user);
+  const { isLoadingUser, isValidUser } = useSelector(
+    (state) => state.productAppUser,
+  );
 
   const {
     osa: tempOsa,
@@ -71,7 +72,7 @@ export default function ProductsScan({ route }) {
     isLoadingOsa,
     isLoadingPending,
     isLoadingScanned,
-  } = useSelector(state => state.osa);
+  } = useSelector((state) => state.productAppOsa);
 
   useEffect(() => {
     if (!isLoadingUser && isValidUser) {
@@ -82,28 +83,25 @@ export default function ProductsScan({ route }) {
   useEffect(() => {
     if (tempPending) {
       setOsaRequests(tempPending);
-      console.log('temporary osa', tempPending);
     }
   }, [tempPending]);
 
   useEffect(() => {
     if (tempScanned) {
       setOsaScanned(tempScanned);
-      // console.log('temporary osa scanned products', tempScanned);
     }
   }, [tempScanned]);
 
-  const scan = item => {
-    navigation.navigate('Scanner', { item });
+  const scan = (item) => {
+    navigation.navigate("Scanner", { item });
   };
 
-  const addManually = item => {
-    // console.log('item form add manually', item);
+  const addManually = (item) => {
     setSelectedItem(item);
     setOpen(true);
   };
 
-  const renderItems = item => {
+  const renderItems = (item) => {
     return (
       <OsaScanProduct
         photo={item.productImage}
@@ -118,26 +116,21 @@ export default function ProductsScan({ route }) {
   };
 
   const submitOSA = async (osaRequests, osaScanned) => {
-    // Alert.alert('working on this.');
-    console.log('osa request', requestId);
-    console.log('osa request', osaScanned);
     const result = await dispatch(
       post_osaList({
         requestId: requestId,
         items: osaScanned.data,
       }),
     ).unwrap();
-    console.log('API Success:', result);
 
-    Alert.alert('OSA submitted successfully');
+    Alert.alert("OSA submitted successfully");
 
     navigation.goBack();
   };
 
   const onSave = (item, quantity) => {
-    console.log(quantity);
     if (!(quantity >= 0)) {
-    setEnterQuantityWarning(true)
+      setEnterQuantityWarning(true);
       return;
     }
     dispatch(
@@ -196,7 +189,6 @@ export default function ProductsScan({ route }) {
       }),
     );
   }, [osaScanned, isLoadingOsa]);
-  console.log('Isloading pending', isLoadingPending);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -211,7 +203,7 @@ export default function ProductsScan({ route }) {
         </View>
 
         <View style={{ gap: 12, flex: 1 }}>
-          {(filter == 'both' || filter == 'pending') && (
+          {(filter == "both" || filter == "pending") && (
             <View style={{ flex: 1, padding: 12 }}>
               <Text
                 style={{
@@ -219,7 +211,7 @@ export default function ProductsScan({ route }) {
                   fontWeight: 700,
                   fontSize: 16,
                   lineHeight: 20,
-                  color: '#454545',
+                  color: "#454545",
                 }}
               >
                 Pending items
@@ -229,7 +221,7 @@ export default function ProductsScan({ route }) {
               ) : (
                 <FlatList
                   style={[
-                    { flex: 1, marginBottom: filter == 'pending' ? 64 : 0 },
+                    { flex: 1, marginBottom: filter == "pending" ? 64 : 0 },
                   ]}
                   data={osaRequests.data || []}
                   keyExtractor={(item, index) => index.toString()}
@@ -239,7 +231,7 @@ export default function ProductsScan({ route }) {
                   onEndReachedThreshold={0.5}
                   ListFooterComponent={
                     isLoadingOsa ? (
-                      <View style={{ padding: 16, alignItems: 'center' }}>
+                      <View style={{ padding: 16, alignItems: "center" }}>
                         <Text>Loading more items...</Text>
                       </View>
                     ) : null
@@ -249,7 +241,7 @@ export default function ProductsScan({ route }) {
             </View>
           )}
 
-          {(filter == 'both' || filter == 'scanned') && (
+          {(filter == "both" || filter == "scanned") && (
             <View style={{ flex: 1, padding: 12 }}>
               <Text
                 style={{
@@ -257,7 +249,7 @@ export default function ProductsScan({ route }) {
                   fontWeight: 700,
                   fontSize: 16,
                   lineHeight: 20,
-                  color: '#454545',
+                  color: "#454545",
                 }}
               >
                 Scanned items
@@ -277,7 +269,7 @@ export default function ProductsScan({ route }) {
                   onEndReachedThreshold={0.5}
                   ListFooterComponent={
                     isLoadingOsa ? (
-                      <View style={{ padding: 16, alignItems: 'center' }}>
+                      <View style={{ padding: 16, alignItems: "center" }}>
                         <Text>Loading more items...</Text>
                       </View>
                     ) : null
@@ -300,7 +292,10 @@ export default function ProductsScan({ route }) {
 
         <AddQuantity
           visible={open}
-          onClose={() =>{ setOpen(false); setEnterQuantityWarning(false)}}
+          onClose={() => {
+            setOpen(false);
+            setEnterQuantityWarning(false);
+          }}
           height={308}
           item={selectedItem}
           quantity={quantity}
@@ -333,7 +328,7 @@ const styles = StyleSheet.create({
   },
 
   SubmitOsa: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,

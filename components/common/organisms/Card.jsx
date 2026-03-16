@@ -14,7 +14,7 @@ export default function Card({
   subTitleColor,
   subCount,
 }) {
-   const appColor = useSelector((state) => state?.theme?.appColor) || {};
+   const appColor = useSelector((state) => state?.productAppTheme?.appColor) || {};
 
   return (
     <PageBody style={styles.container}>

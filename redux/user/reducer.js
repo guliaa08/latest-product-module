@@ -7,8 +7,8 @@ const initialState = {
   loggedInUser: {},
 };
 
-const userSlice = createSlice({
-  name: 'userSlice',
+const productAppUserSlice = createSlice({
+  name: 'productAppUserSlice',
   initialState,
   reducers: {},
   extraReducers: builder => {
@@ -28,4 +28,4 @@ const userSlice = createSlice({
   },
 });
 
-export default userSlice.reducer;
+export default productAppUserSlice.reducer;

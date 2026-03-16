@@ -9,7 +9,6 @@ export const get_user_verify = createAsyncThunk(
       const data = await api.get('auth/verify/');
       return data;
     } catch (error) {
-      console.log('error', error);
       return thunkApi.rejectWithValue(error);
     }
   },

@@ -4,8 +4,8 @@ const initialState = {
   authKey: null,
 };
 
-const authSlice = createSlice({
-  name: "auth",
+const productAppAuthSlice = createSlice({
+  name: "productAppAuthSlice",
   initialState,
   reducers: {
     setAuthKey: (state, action) => {
@@ -17,5 +17,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setAuthKey, clearAuthKey } = authSlice.actions;
-export default authSlice.reducer;
+export const { setAuthKey, clearAuthKey } = productAppAuthSlice.actions;
+export default productAppAuthSlice.reducer;

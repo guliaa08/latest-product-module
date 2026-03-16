@@ -12,8 +12,8 @@ const initialState = {
   isLoadingProducts: false,
 };
 
-const productsSlice = createSlice({
-  name: 'productsSlice',
+const productAppProductSlice = createSlice({
+  name: 'productAppProductSlice',
   initialState,
   reducers: {},
   extraReducers: builder => {
@@ -36,8 +36,6 @@ const productsSlice = createSlice({
     });
     builder.addCase(get_categories.fulfilled, (state, action) => {
       state.isLoadingCategories = false;
-      // if API returns { data: [...] }
-      //  console.log("payload of categories",action.payload.data.data)
       state.categories = action.payload.data;
     });
     builder.addCase(get_categories.rejected, state => {
@@ -65,7 +63,6 @@ const productsSlice = createSlice({
     builder.addCase(get_osaRequests.fulfilled,(state,action)=>{
       state.isLoadingOsa= false;
       state.osaRequests = action.payload;
-      console.log('action.payload',action.payload);
       
     });
     builder.addCase(get_osaRequests.rejected,state=>{
@@ -77,4 +74,4 @@ const productsSlice = createSlice({
   },
 });
 
-export default productsSlice.reducer;
+export default productAppProductSlice.reducer;

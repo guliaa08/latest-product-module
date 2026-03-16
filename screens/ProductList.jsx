@@ -27,10 +27,11 @@ import { get_osaRequests } from "../redux/product/action";
 import Card from "../components/common/organisms/Card";
 import { changeTheme } from "../redux/theme/themeReducer";
 import OSARequests from "./OsaRequests";
+import { setAuthKey } from "../redux/auth/reducer";
 
-const ProductList = ({ navigation }) => {
-  const appColor = useSelector((state) => state?.theme?.appColor) || {};
-  console.log({ appColor });
+const ProductList = ({ navigation, authKey, isDarkMode }) => {
+  const appColor =
+    useSelector((state) => state?.productAppTheme?.appColor) || {};
   const dispatch = useDispatch();
 
   const gap = 8;
@@ -47,7 +48,7 @@ const ProductList = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const productState = useSelector((state) => state?.product || {});
+  const productState = useSelector((state) => state?.productAppProduct || {});
 
   const {
     products: list,
@@ -56,17 +57,17 @@ const ProductList = ({ navigation }) => {
     osaRequests: tempOsaRequests,
   } = productState;
 
-  console.log("productState", productState);
-
   // const {
   //   products: list,
   //   categories: tempCategories,
   //   dashboardMetrics: tempDashboardMetrics,
   //   osaRequests: tempOsaRequests,
-  // } = useSelector((state) => state.product);
+  // } = useSelector((state) => state.productAppProduct);
 
   // const { categories } = useSelector(state => state.categories);
-  const { isLoadingUser, isValidUser } = useSelector((state) => state.user);
+  const { isLoadingUser, isValidUser } = useSelector(
+    (state) => state.productAppUser,
+  );
 
   /* ---------------- VERIFY USER ---------------- */
   useEffect(() => {
@@ -82,6 +83,16 @@ const ProductList = ({ navigation }) => {
       dispatch(get_osaRequests());
     }
   }, [isLoadingUser, isValidUser]);
+
+  useEffect(() => {
+    if (authKey) {
+      dispatch(setAuthKey(authKey));
+    }
+  }, [authKey]);
+
+  useEffect(() => {
+    dispatch(changeTheme(isDarkMode ? "dark" : "light"));
+  }, [isDarkMode]);
 
   /* ---------------- PROCESS DATA ---------------- */
 
