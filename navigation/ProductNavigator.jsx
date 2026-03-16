@@ -1,61 +1,130 @@
-// navigation/ProductNavigator.tsx
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ProductList from '../screens/ProductList';
-import ProductDetail from '../screens/ProductDetails';
-import OsaRequests from '../screens/OsaRequests';
-import ProductsScan from '../screens/ProductsScan';
-import ProductsPerCategory from '../screens/ProductsPerCategory';
+// // navigation/ProductNavigator.tsx
+// import React from "react";
+// import { createNativeStackNavigator } from "@react-navigation/native-stack";
+// import ProductList from "../screens/ProductList";
+// import ProductDetail from "../screens/ProductDetails";
+// import OsaRequests from "../screens/OsaRequests";
+// import ProductsScan from "../screens/ProductsScan";
+// import ProductsPerCategory from "../screens/ProductsPerCategory";
+// import AllOsaRequests from "../screens/AllOsaRequests";
+// import Scanner from "../screens/Scanner";
+
+// const Stack = createNativeStackNavigator();
+
+// const ProductNavigator = ({ authKey = "" }) => {
+//   console.log({authKey,authKey})
+//   return (
+//     <Stack.Navigator initialRouteName="ProductList">
+//       <Stack.Screen name="ProductList" options={{ title: "Products" }}>
+//         {(props) => <ProductList {...props} authToken={authKey} />}
+//       </Stack.Screen>
+//       <Stack.Screen name="ProductDetail" options={{ title: "Product Details" }}>
+//         {(props) => <ProductDetail {...props} authToken={authKey} />}
+//       </Stack.Screen>
+//       <Stack.Screen name="OsaRequests" options={{ title: "OSA Requests" }}>
+//         {(props) => <AllOsaRequests {...props} authToken={authKey} />}
+//       </Stack.Screen>
+//       <Stack.Screen
+//         name="ProductsScan"
+//         options={{
+//           title: "Products Scan",
+//           headerShown: false,
+//           headerTransparent: false,
+//         }}
+//       >
+//         {(props) => <ProductsScan {...props} authToken={authKey} />}
+//       </Stack.Screen>
+//       <Stack.Screen
+//         name="ProductsPerCategory"
+//         options={{
+//           title: "Products Per Category",
+//           headerShown: false,
+//           headerTransparent: false,
+//         }}
+//       >
+//         {(props) => <ProductsPerCategory {...props} authToken={authKey} />}
+//       </Stack.Screen>
+//       <Stack.Screen
+//         name="Scanner"
+//         options={{
+//           title: "Aira Lens",
+//           headerShown: false,
+//           headerTransparent: false,
+//         }}
+//       >
+//         {(props) => <Scanner {...props} authToken={authKey} />}
+//       </Stack.Screen>
+//     </Stack.Navigator>
+//   );
+// };
+
+// export default ProductNavigator;
+
+import React, { useEffect } from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useDispatch } from "react-redux";
+import { setAuthKey } from "../redux/auth/reducer";
+
+import ProductList from "../screens/ProductList";
+import ProductDetail from "../screens/ProductDetails";
+import ProductsScan from "../screens/ProductsScan";
+import ProductsPerCategory from "../screens/ProductsPerCategory";
 import AllOsaRequests from "../screens/AllOsaRequests";
-import Scanner from "../screens/Scanner"
+import Scanner from "../screens/Scanner";
+import { changeTheme } from "../redux/theme/themeReducer";
 
 const Stack = createNativeStackNavigator();
 
-const ProductNavigator = () => {
+const ProductNavigator = ({ authKey = "", isDarkMode = false }) => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (authKey) {
+      dispatch(setAuthKey(authKey));
+    }
+  }, [authKey]);
+
+  useEffect(() => {
+    dispatch(changeTheme(isDarkMode ? "dark" : "light"));
+  }, [isDarkMode]);
+
   return (
     <Stack.Navigator initialRouteName="ProductList">
-      <Stack.Screen
-        name="ProductList"
-        component={ProductList}
-        options={{ title: 'Products' }}
-      />
-      <Stack.Screen
-        name="ProductDetail"
-        component={ProductDetail}
-        options={{ title: 'Product Details' }}
-      />
-      <Stack.Screen
-        name="OsaRequests"
-        component={AllOsaRequests}
-        options={{ title: 'OSA Requests' }}
-      />
+      <Stack.Screen name="ProductList" options={{ title: "Products" }}>
+        {(props) => <ProductList {...props} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="ProductDetail" options={{ title: "Product Details" }}>
+        {(props) => <ProductDetail {...props} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="OsaRequests" options={{ title: "OSA Requests" }}>
+        {(props) => <AllOsaRequests {...props} />}
+      </Stack.Screen>
+
       <Stack.Screen
         name="ProductsScan"
-        component={ProductsScan}
         options={{
-          title: 'Products Scan',
+          title: "Products Scan",
           headerShown: false,
-          headerTransparent: false,
         }}
-      />
-      <Stack.Screen
-        name="ProductsPerCategory"
-        component={ProductsPerCategory}
-        options={{
-          title: 'Products Per Category',
-          headerShown: false,
-          headerTransparent: false,
-        }}
-      />
+      >
+        {(props) => <ProductsScan {...props} />}
+      </Stack.Screen>
+
+      <Stack.Screen name="ProductsPerCategory" options={{ headerShown: false }}>
+        {(props) => <ProductsPerCategory {...props} />}
+      </Stack.Screen>
+
       <Stack.Screen
         name="Scanner"
-        component={Scanner}
         options={{
-          title: 'Aira Lens',
+          title: "Aira Lens",
           headerShown: false,
-          headerTransparent: false,
         }}
-      />
+      >
+        {(props) => <Scanner {...props} />}
+      </Stack.Screen>
     </Stack.Navigator>
   );
 };
