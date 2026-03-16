@@ -9,7 +9,7 @@ const themeSlice = createSlice({
   initialState,
   reducers: {
     changeTheme: (state, action) => {
-      console.log({ action });
+      console.log({ action, action });
       state.appColor = COLOR_SCHEMES[action.payload];
     },
   },

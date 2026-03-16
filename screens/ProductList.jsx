@@ -29,7 +29,8 @@ import { changeTheme } from "../redux/theme/themeReducer";
 import OSARequests from "./OsaRequests";
 
 const ProductList = ({ navigation }) => {
-  const { appColor } = useSelector(({ theme }) => theme);
+  const appColor = useSelector((state) => state?.theme?.appColor) || {};
+  console.log({ appColor });
   const dispatch = useDispatch();
 
   const gap = 8;
