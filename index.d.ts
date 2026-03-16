@@ -1,0 +1,10 @@
+import { ComponentType } from "react";
+export const ProductNavigator: ComponentType<any>;
+export const ProductList: ComponentType<any>;
+export const ProductDetails: ComponentType<any>;
+export const OsaRequests: ComponentType<any>;
+export const ProductsScan: ComponentType<any>;
+export const ProductsPerCategory: ComponentType<any>;
+export const AllOsaRequests: ComponentType<any>;
+export const Scanner: ComponentType<any>;
+export const ProductStore: ComponentType<any>;
