@@ -1,14 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { COLOR_SCHEMES } from "../../components/common/color";
 
 const initialState = {
-  theme: "light",
+  appColor: COLOR_SCHEMES["light"],
 };
 const themeSlice = createSlice({
   name: "theme",
   initialState,
   reducers: {
     changeTheme: (state, action) => {
-      state.theme = action.payload;
+      console.log({ action });
+      state.appColor = COLOR_SCHEMES[action.payload];
     },
   },
 });

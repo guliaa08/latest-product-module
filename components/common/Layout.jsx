@@ -1,8 +1,7 @@
-import React from 'react';
-import { ScrollView, View } from 'react-native';
-import { useSelector } from 'react-redux';
-import useTheme from '../../hooks/useTheme';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React from "react";
+import { ScrollView, View } from "react-native";
+import { useSelector } from "react-redux";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export const PageBody = ({
   children,
@@ -11,15 +10,13 @@ export const PageBody = ({
   refreshControl,
   ...props
 }) => {
-  const colors = useTheme();
+  const { appColor } = useSelector(({ theme }) => theme);
   const Container = scrollable ? ScrollView : View;
 
   return (
-    
-
     <Container
       style={[
-        { flex: 1, backgroundColor: colors.background, paddingHorizontal: 4 },
+        { flex: 1, backgroundColor: appColor.background, paddingHorizontal: 4 },
         style,
       ]}
       {...(scrollable ? { refreshControl } : {})}
@@ -27,12 +24,11 @@ export const PageBody = ({
     >
       {children}
     </Container>
-      
   );
 };
 
 export const Center = ({ children, style }) => (
-  <View style={[{ alignItems: 'center', justifyContent: 'center' }, style]}>
+  <View style={[{ alignItems: "center", justifyContent: "center" }, style]}>
     {children}
   </View>
 );

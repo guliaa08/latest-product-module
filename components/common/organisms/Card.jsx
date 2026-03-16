@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet } from 'react-native';
-import React from 'react';
-import { PageBody } from '../Layout';
-import useTheme from '../../../hooks/useTheme';
-import Icon from 'react-native-vector-icons/dist/EvilIcons';
+import { View, Text, StyleSheet } from "react-native";
+import React from "react";
+import { PageBody } from "../Layout";
+import Icon from "react-native-vector-icons/dist/EvilIcons";
+import { useSelector } from "react-redux";
 export default function Card({
   title,
   subTitle,
@@ -14,26 +14,24 @@ export default function Card({
   subTitleColor,
   subCount,
 }) {
-  const color = useTheme();
-  console.log('color', color);
+  const { appColor } = useSelector(({ theme }) => theme);
 
   return (
     <PageBody style={styles.container}>
-      <Text style={[{ color: color.text.light }, styles.title]}>
-        {title} <Icon size={16} color={iconColor} name={'chevron-right'} />{' '}
+      <Text style={[{ color: appColor.text.light }, styles.title]}>
+        {title} <Icon size={16} color={iconColor} name={"chevron-right"} />{" "}
       </Text>
-      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
-        <Text style={[{ color: color.text.light }, styles.count]}>{count}</Text>
-        <Text style={{ letterSpacing: -1, color: color.text.light }}>
+      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
+        <Text style={[{ color: appColor.text.light }, styles.count]}>{count}</Text>
+        <Text style={{ letterSpacing: -1, color: appColor.text.light }}>
           {subCount && subCount}
         </Text>
       </View>
-      <View style={{ flexDirection: 'row', alignItems:"center" , gap:4}}>
-     
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
         {iconName && <Icon size={10} color={iconColor} name={iconName} />}
         {
           syncTime ? (
-            <Text style={[{ color: color.text.light }, styles.subTitle]}>
+            <Text style={[{ color: appColor.text.light }, styles.subTitle]}>
               Sync {syncTime}h ago
             </Text>
           ) : (
@@ -54,7 +52,7 @@ const styles = StyleSheet.create({
     gap: 4,
     borderRadius: 12,
     // borderWidth:1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingStart: 20,
     // borderWidth:1,
   },
@@ -63,7 +61,7 @@ const styles = StyleSheet.create({
   },
   count: {
     fontSize: 28,
-    fontWeight: '300',
+    fontWeight: "300",
     letterSpacing: -3,
     lineHeight: 32,
   },
