@@ -7,7 +7,7 @@
   "author": "Karan Gulia",
   "license": "ISC",
   "files": [
-    "components",
+   "components",
     "hooks",
     "navigation",
     "redux",
