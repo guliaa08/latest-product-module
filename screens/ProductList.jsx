@@ -32,6 +32,13 @@ import { setAuthKey } from "../redux/auth/reducer";
 const ProductList = ({ navigation, authKey, isDarkMode }) => {
   const appColor =
     useSelector((state) => state?.productAppTheme?.appColor) || {};
+  const productsss = useSelector(
+    (state) =>
+      state?.productApp?.productAppProduct || {
+        name: "nhi aya",
+      },
+  );
+  console.log("productsss", productsss);
   const dispatch = useDispatch();
 
   const gap = 8;

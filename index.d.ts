@@ -8,3 +8,4 @@ export const ProductsPerCategory: ComponentType<any>;
 export const AllOsaRequests: ComponentType<any>;
 export const Scanner: ComponentType<any>;
 export const ProductStore: ComponentType<any>;
+export const productAppReducer: ComponentType<any>;
