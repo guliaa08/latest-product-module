@@ -34,7 +34,7 @@ const ProductList = ({ navigation, authKey, isDarkMode }) => {
     useSelector((state) => state?.productAppTheme?.appColor) || {};
   const productsss = useSelector(
     (state) =>
-      state?.productApp?.productAppProduct || {
+      state.productAppProduct || {
         name: "nhi aya",
       },
   );
