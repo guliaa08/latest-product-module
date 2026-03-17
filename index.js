@@ -8,4 +8,4 @@ export { default as AllOsaRequests } from "./screens/AllOsaRequests";
 export { default as Scanner } from "./screens/Scanner";
 export { store, persistor } from "./redux/store";
 // index.js of module
-export { default as productAppReducer } from "./redux/rootReducer";
+export { default as productAppReducer } from "./redux/reducers";
