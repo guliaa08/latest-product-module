@@ -72,9 +72,9 @@ const ProductList = ({ navigation, authKey, isDarkMode }) => {
   // } = useSelector((state) => state.productAppProduct);
 
   // const { categories } = useSelector(state => state.categories);
-  const { isLoadingUser, isValidUser } = useSelector(
-    (state) => state.productAppUser,
-  );
+  const user = useSelector((state) => state.productAppUser || {});
+  console.log({ user });
+  const { isLoadingUser, isValidUser } = user;
 
   /* ---------------- VERIFY USER ---------------- */
   useEffect(() => {
