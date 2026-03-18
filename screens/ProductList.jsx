@@ -77,13 +77,10 @@ const ProductList = ({ navigation }) => {
 
   /* ---------------- GET PRODUCTS ---------------- */
   useEffect(() => {
-    if (!isLoadingUser && isValidUser) {
-      // dispatch(get_products());
-      dispatch(get_categories());
-      dispatch(get_activeProducts());
-      dispatch(get_osaRequests());
-    }
-  }, [isLoadingUser, isValidUser]);
+    dispatch(get_categories());
+    dispatch(get_activeProducts());
+    dispatch(get_osaRequests());
+  }, []);
 
   /* ---------------- PROCESS DATA ---------------- */
 
