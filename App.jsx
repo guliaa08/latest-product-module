@@ -6,8 +6,9 @@ import { PersistGate } from "redux-persist/integration/react";
 import { NavigationContainer } from "@react-navigation/native";
 import ProductNavigator from "./navigation/ProductNavigator.jsx";
 
-function App() {
+function App(props) {
   const isDarkMode = useColorScheme() === "light";
+  console.log(props, "ther props at app");
 
   return (
     <Provider store={store}>
