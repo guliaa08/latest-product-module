@@ -6,4 +6,4 @@ export { default as ProductsScan } from "./screens/ProductsScan";
 export { default as ProductsPerCategory } from "./screens/ProductsPerCategory";
 export { default as AllOsaRequests } from "./screens/AllOsaRequests";
 export { default as Scanner } from "./screens/Scanner";
-export { default as ProductApp } from "./App.jsx";
+export { default as ProductApp } from "./App";
