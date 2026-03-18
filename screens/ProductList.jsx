@@ -30,13 +30,14 @@ import OSARequests from "./OsaRequests";
 const ProductList = ({ navigation }) => {
   const appColor =
     useSelector((state) => state?.productAppTheme?.appColor) || {};
-  const productsss = useSelector((state) => state.productAppProduct);
-  console.log("productsss", productsss);
   const dispatch = useDispatch();
 
   const gap = 8;
   const padding = 16;
   const screenWidth = Dimensions.get("window").width - (gap + padding * 2);
+
+  const store = useSelector((state) => state); // see FULL state shape
+  console.log("FULL STATE:", JSON.stringify(Object.keys(store)));
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
