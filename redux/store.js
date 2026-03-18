@@ -5,7 +5,7 @@ import rootReducer from "./reducers";
 const persistConfig = {
   key: "productModule",
   storage: AsyncStorage,
-  whiteList: ["productAppAuth", "productAppTheme"],
+  whitelist: ["productAppAuth", "productAppTheme"],
 };
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 const store = configureStore({
