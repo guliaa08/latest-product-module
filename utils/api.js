@@ -64,7 +64,7 @@ instance.interceptors.request.use(
     console.log("tokenn =>", token);
     console.log(
       "apiKey =>",
-      JSON.parse(JSON.parse(str).productAppAuth).authKey,
+      JSON.parse(JSON.parse(token).productAppAuth).authKey,
     );
     const authKey = parseNestedJSON(token);
     console.log("authKeyyyy =>", authKey);
