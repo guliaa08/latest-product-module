@@ -20,8 +20,10 @@ export const get_products = createAsyncThunk(
 export const get_categories = createAsyncThunk(
   "get_categories",
   async (_params, thunkApi) => {
+    console.log("getting the products");
     try {
       const data = await api.get("category/");
+      console.log(data, "the data of category we get");
       return data;
     } catch (error) {
       return thunkApi.rejectWithValue(error);
