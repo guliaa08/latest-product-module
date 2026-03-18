@@ -30,12 +30,7 @@ import OSARequests from "./OsaRequests";
 const ProductList = ({ navigation }) => {
   const appColor =
     useSelector((state) => state?.productAppTheme?.appColor) || {};
-  const productsss = useSelector(
-    (state) =>
-      state.productAppProduct || {
-        name: "nhi aya",
-      },
-  );
+  const productsss = useSelector((state) => state.productAppProduct);
   console.log("productsss", productsss);
   const dispatch = useDispatch();
 
@@ -62,6 +57,7 @@ const ProductList = ({ navigation }) => {
     osaRequests: tempOsaRequests,
   } = productState;
 
+  console.log("the product state log", productState);
   // const {
   //   products: list,
   //   categories: tempCategories,
