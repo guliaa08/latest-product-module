@@ -1,4 +1,4 @@
-export { default as ProductNavigator } from "./navigation/ProductNavigator";
+export { default as ProductNavigator } from "./navigation/ProductNavigatorWithStore";
 export { default as ProductList } from "./screens/ProductList";
 export { default as ProductDetails } from "./screens/ProductDetails";
 export { default as OsaRequests } from "./screens/OsaRequests";
