@@ -22,7 +22,7 @@ import {
   get_products,
 } from "../redux/product/action";
 import { useDispatch, useSelector } from "react-redux";
-import { get_user_verify } from "../redux/user/actions";
+import { get_user_verify } from "../redux/productUser/actions";
 import { get_osaRequests } from "../redux/product/action";
 import Card from "../components/common/organisms/Card";
 import { changeTheme } from "../redux/theme/themeReducer";

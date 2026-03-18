@@ -50,7 +50,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const parseNestedJSON = (str) =>
   JSON.parse(JSON.parse(str).productAppAuth).authKey;
-const api = axios.create({
+const instance = axios.create({
   baseURL: "https://omnichannel-apiv1.airaops.com/",
   headers: {
     Accept: "application/json",
@@ -58,7 +58,7 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use(
+instance.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("persist:productModule");
     console.log("tokenn =>", token);
@@ -74,7 +74,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-api.interceptors.response.use(
+instance.interceptors.response.use(
   (response) => response.data,
   (error) => {
     const response = error.response;

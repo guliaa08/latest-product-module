@@ -1,6 +1,6 @@
 import { combineReducers } from "@reduxjs/toolkit";
 import productAppProductSlice from "./product/reducers";
-import productAppUserSlice from "./user/reducer";
+import productAppUserSlice from "./productUser/reducer";
 import productAppThemeSlice from "./theme/themeReducer";
 import productAppOsaSlice from "./osa/reducers";
 import productAppAuthSlice from "./auth/reducer";
