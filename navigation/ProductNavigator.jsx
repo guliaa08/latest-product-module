@@ -74,8 +74,10 @@ import { useDispatch } from "react-redux";
 
 const Stack = createNativeStackNavigator();
 
-const ProductNavigator = ({ authKey = "", isDarkMode = false }) => {
-  console.log(authKey, "the auth key we get in ProductNavigator");
+const ProductNavigator = (props) => {
+  console.log(props, "the props we get at product module");
+  const authKey = props.authKey;
+  const isDarkMode = props.isDarkMode;
   const dispatch = useDispatch();
   useEffect(() => {
     if (authKey) {
