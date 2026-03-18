@@ -3,7 +3,7 @@ import productAppProductSlice from "./product/reducers";
 import productAppUserSlice from "./productUser/reducer";
 import productAppThemeSlice from "./theme/themeReducer";
 import productAppOsaSlice from "./osa/reducers";
-import productAppAuthSlice from "./auth/reducer";
+import productAppAuthSlice from "./productAuth/reducer";
 const rootReducer = combineReducers({
   productAppProduct: productAppProductSlice,
   productAppUser: productAppUserSlice,

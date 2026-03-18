@@ -1,5 +1,5 @@
 import { timeAgo, TimeAgo } from "../helper/time_ago/TimeAgo";
-import React, { useState, useEffect, act } from "react";
+import { useState, useEffect, act } from "react";
 import { NumberConversion } from "../helper/number_converter/NumberConverter";
 import {
   View,
@@ -25,11 +25,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { get_user_verify } from "../redux/productUser/actions";
 import { get_osaRequests } from "../redux/product/action";
 import Card from "../components/common/organisms/Card";
-import { changeTheme } from "../redux/theme/themeReducer";
 import OSARequests from "./OsaRequests";
-import { setAuthKey } from "../redux/auth/reducer";
 
-const ProductList = ({ navigation, authKey, isDarkMode }) => {
+const ProductList = ({ navigation }) => {
   const appColor =
     useSelector((state) => state?.productAppTheme?.appColor) || {};
   const productsss = useSelector(
@@ -90,16 +88,6 @@ const ProductList = ({ navigation, authKey, isDarkMode }) => {
       dispatch(get_osaRequests());
     }
   }, [isLoadingUser, isValidUser]);
-
-  useEffect(() => {
-    if (authKey) {
-      dispatch(setAuthKey(authKey));
-    }
-  }, [authKey]);
-
-  useEffect(() => {
-    dispatch(changeTheme(isDarkMode ? "dark" : "light"));
-  }, [isDarkMode]);
 
   /* ---------------- PROCESS DATA ---------------- */
 

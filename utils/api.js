@@ -62,6 +62,10 @@ instance.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("persist:productModule");
     console.log("tokenn =>", token);
+    console.log(
+      "apiKey =>",
+      JSON.parse(JSON.parse(str).productAppAuth).authKey,
+    );
     const authKey = parseNestedJSON(token);
     console.log("authKeyyyy =>", authKey);
     if (authKey) {

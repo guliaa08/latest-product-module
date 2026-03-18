@@ -67,10 +67,24 @@ import ProductsScan from "../screens/ProductsScan";
 import ProductsPerCategory from "../screens/ProductsPerCategory";
 import AllOsaRequests from "../screens/AllOsaRequests";
 import Scanner from "../screens/Scanner";
+import { setAuthKey } from "../redux/productAuth/reducer";
+import { changeTheme } from "../redux/theme/themeReducer";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 const Stack = createNativeStackNavigator();
 
 const ProductNavigator = ({ authKey = "", isDarkMode = false }) => {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (authKey) {
+      dispatch(setAuthKey(authKey));
+    }
+  }, [authKey]);
+
+  useEffect(() => {
+    dispatch(changeTheme(isDarkMode ? "dark" : "light"));
+  }, [isDarkMode]);
   return (
     <Stack.Navigator initialRouteName="ProductList">
       <Stack.Screen name="ProductList" options={{ title: "Products" }}>
