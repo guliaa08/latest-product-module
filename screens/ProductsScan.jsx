@@ -25,20 +25,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../components/common/molecules/Header";
 import OsaScanProduct from "../components/common/molecules/OsaScanProduct";
 import { useDispatch, useSelector } from "react-redux";
-import { get_osaList, post_osaList } from "../redux/osa/action";
+import { get_osaList, post_osaList, submit_OSA } from "../redux/osa/action";
 import { useNavigation } from "@react-navigation/native";
 import {
   addScannedDisplay,
   addScannedItem,
   resetExecution,
+  resetScannedDisplay,
 } from "../redux/osa/reducers";
 import AddQuantity from "../components/common/molecules/AddQuantity";
 import FilterBottomSheet from "../components/common/molecules/FilterBottomSheet";
 import SortBottomSheet from "../components/common/molecules/SortBottomSheet";
 import Loader from "../components/common/atoms/Loader";
+import AppHeader from "../components/common/atoms/AppHeader";
 
 export default function ProductsScan({ route }) {
   const { request } = route.params;
+  const { appColor } = useSelector((state) => state?.productAppTheme);
   const [open, setOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -52,7 +55,7 @@ export default function ProductsScan({ route }) {
   });
 
   const navigation = useNavigation();
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState();
   const dispatch = useDispatch();
   const pendingMomentum = useRef(true);
   const scannedMomentum = useRef(true);
@@ -72,7 +75,14 @@ export default function ProductsScan({ route }) {
     isLoadingOsa,
     isLoadingPending,
     isLoadingScanned,
+    submitted,
   } = useSelector((state) => state.productAppOsa);
+
+  // useEffect(() => {
+  //   if (submitted) {
+  //     navigation.goBack();
+  //   }
+  // }, [submitted]);
 
   useEffect(() => {
     if (!isLoadingUser && isValidUser) {
@@ -93,7 +103,7 @@ export default function ProductsScan({ route }) {
   }, [tempScanned]);
 
   const scan = (item) => {
-    navigation.navigate("Scanner", { item });
+    navigation.navigate("Scanner", { item, requestId });
   };
 
   const addManually = (item) => {
@@ -116,19 +126,15 @@ export default function ProductsScan({ route }) {
   };
 
   const submitOSA = async (osaRequests, osaScanned) => {
-    const result = await dispatch(
-      post_osaList({
-        requestId: requestId,
-        items: osaScanned.data,
-      }),
-    ).unwrap();
-
-    Alert.alert("OSA submitted successfully");
-
+    if (osaScanned.total + osaRequests.total != osaScanned.total) {
+      return;
+    }
+    await dispatch(submit_OSA({ requestId }));
     navigation.goBack();
   };
 
-  const onSave = (item, quantity) => {
+  const onSave = async (item, quantity) => {
+
     if (!(quantity >= 0)) {
       setEnterQuantityWarning(true);
       return;
@@ -136,10 +142,39 @@ export default function ProductsScan({ route }) {
     dispatch(
       addScannedItem({
         productId: item.productId,
-        quantity,
+        quantity: Number(quantity),
         item,
       }),
     );
+
+    const result = await dispatch(
+      post_osaList({
+        requestId: requestId,
+        // items: osaScanned.data,
+        items: [
+          {
+            physicalCount: Number(quantity),
+            productId: item.productId,
+          },
+        ],
+      }),
+    ).unwrap();
+
+    //  dispatch(
+    //   get_osaList({
+    //     request,
+    //     params: { scannedPage: osaScanned.page  },
+    //   }),
+    // );
+
+    //  dispatch(
+    //   get_osaList({
+    //     request,
+    //     params: { pendingPage: osaRequests.page  },
+    //   }),
+    // );
+
+    // dispatch(addScannedDisplay({productId:item.productId, physicalCount:Number(quantity)}))
     Keyboard.dismiss();
     setOpen(false);
     return;
@@ -189,136 +224,182 @@ export default function ProductsScan({ route }) {
       }),
     );
   }, [osaScanned, isLoadingOsa]);
+  /* ---------------- Header ---------------- */
+  React.useEffect(() => {
+    navigation.setOptions({
+      header: () => {
+        return (
+          <AppHeader
+            leadingButtonPress={() => {
+              if (isSearching) {
+                dispatch(setIsSearching(!isSearching));
+              } else {
+                navigation.goBack();
+              }
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Text
+                style={{
+                  // fontFamily: fonts.font_700,
+                  fontSize: 16,
+                  lineHeight: 20,
+                  color: appColor.text.dark,
+                }}
+              >
+                Roles
+              </Text>
+            </View>
+          </AppHeader>
+        );
+      },
+    });
+  }, [navigation, dispatch, appColor]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <View style={{ height: 120 }}>
-          <Header
-            request={request}
-            setFilterOpen={setFilterOpen}
-            setSort={setSortOpen}
-            filter={filter}
-          />
-        </View>
+    <View style={{ flex: 1 }}>
+      <PageBody>
+        <View style={styles.container}>
+          <View style={{ height: 120 }}>
+            <Header
+              request={request}
+              setFilterOpen={setFilterOpen}
+              setSort={setSortOpen}
+              filter={filter}
+            />
+          </View>
 
-        <View style={{ gap: 12, flex: 1 }}>
-          {(filter == "both" || filter == "pending") && (
-            <View style={{ flex: 1, padding: 12 }}>
-              <Text
-                style={{
-                  height: 20,
-                  fontWeight: 700,
-                  fontSize: 16,
-                  lineHeight: 20,
-                  color: "#454545",
-                }}
-              >
-                Pending items
-              </Text>
-              {isLoadingPending ? (
-                <Loader />
-              ) : (
-                <FlatList
-                  style={[
-                    { flex: 1, marginBottom: filter == "pending" ? 64 : 0 },
-                  ]}
-                  data={osaRequests.data || []}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => renderItems(item)}
-                  ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-                  onEndReached={() => loadMorePending()}
-                  onEndReachedThreshold={0.5}
-                  ListFooterComponent={
-                    isLoadingOsa ? (
-                      <View style={{ padding: 16, alignItems: "center" }}>
-                        <Text>Loading more items...</Text>
-                      </View>
-                    ) : null
-                  }
-                />
-              )}
-            </View>
-          )}
-
-          {(filter == "both" || filter == "scanned") && (
-            <View style={{ flex: 1, padding: 12 }}>
-              <Text
-                style={{
-                  height: 20,
-                  fontWeight: 700,
-                  fontSize: 16,
-                  lineHeight: 20,
-                  color: "#454545",
-                }}
-              >
-                Scanned items
-              </Text>
-              {isLoadingScanned ? (
-                <Loader />
-              ) : (
-                <FlatList
-                  style={[{ flex: 1, marginBottom: 64 }]}
-                  data={osaScanned.data}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => {
-                    return renderItems(item);
+          <View style={{ gap: 12, flex: 1 }}>
+            {(filter == "both" || filter == "pending") && (
+              <View style={{ flex: 1, padding: 12, gap: 12 }}>
+                <Text
+                  style={{
+                    height: 20,
+                    fontWeight: 700,
+                    fontSize: 16,
+                    lineHeight: 20,
+                    color: appColor.text.regular,
                   }}
-                  ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-                  onEndReached={() => loadMoreScanned()}
-                  onEndReachedThreshold={0.5}
-                  ListFooterComponent={
-                    isLoadingOsa ? (
-                      <View style={{ padding: 16, alignItems: "center" }}>
-                        <Text>Loading more items...</Text>
-                      </View>
-                    ) : null
-                  }
-                />
-              )}
-            </View>
-          )}
-        </View>
+                >
+                  Pending items
+                </Text>
+                {isLoadingPending ? (
+                  <Loader />
+                ) : (
+                  <FlatList
+                    style={[
+                      { flex: 1, marginBottom: filter == "pending" ? 64 : 0 },
+                    ]}
+                    data={osaRequests.data || []}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => renderItems(item)}
+                    ItemSeparatorComponent={() => (
+                      <View style={{ height: 8 }} />
+                    )}
+                    onEndReached={() => loadMorePending()}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={
+                      isLoadingOsa ? (
+                        <View style={{ padding: 16, alignItems: "center" }}>
+                          <Text>Loading more items...</Text>
+                        </View>
+                      ) : null
+                    }
+                  />
+                )}
+              </View>
+            )}
 
-        <View style={styles.SubmitOsa}>
-          <SubmitOsa
-            submitOSA={() => {
-              submitOSA(osaRequests, osaScanned);
+            {(filter == "both" || filter == "scanned") && (
+              <View style={{ flex: 1, padding: 12, gap: 12 }}>
+                <Text
+                  style={{
+                    height: 20,
+                    fontWeight: 700,
+                    fontSize: 16,
+                    lineHeight: 20,
+                    color: appColor.text.regular,
+                  }}
+                >
+                  Scanned items
+                </Text>
+                {isLoadingScanned ? (
+                  <Loader />
+                ) : (
+                  <FlatList
+                    style={[{ flex: 1, marginBottom: 64 }]}
+                    data={osaScanned.data}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item }) => {
+                      return renderItems(item);
+                    }}
+                    ItemSeparatorComponent={() => (
+                      <View style={{ height: 8 }} />
+                    )}
+                    onEndReached={() => loadMoreScanned()}
+                    onEndReachedThreshold={0.5}
+                    ListFooterComponent={
+                      isLoadingOsa ? (
+                        <View style={{ padding: 16, alignItems: "center" }}>
+                          <Text>Loading more items...</Text>
+                        </View>
+                      ) : null
+                    }
+                  />
+                )}
+              </View>
+            )}
+          </View>
+
+          <View style={styles.SubmitOsa}>
+            <SubmitOsa
+              submitOSA={() => {
+                submitOSA(osaRequests, osaScanned);
+              }}
+              pending={osaRequests?.total + osaScanned?.total || 0}
+              scanned={osaScanned?.total || 0}
+              isDisabled={
+                osaScanned.total + osaRequests.total != osaScanned.total
+              }
+            />
+          </View>
+
+          <AddQuantity
+            visible={open}
+            onClose={() => {
+              setOpen(false);
+              setEnterQuantityWarning(false);
             }}
-            pending={osaRequests?.data?.length || 0}
-            scanned={osaScanned?.data?.length || 0}
+            height={308}
+            item={selectedItem}
+            quantity={quantity}
+            setQuantity={setQuantity}
+            onSave={() => {
+              onSave(selectedItem, quantity);
+            }}
+            enterQuantityWarning={enterQuantityWarning}
           />
         </View>
 
-        <AddQuantity
-          visible={open}
-          onClose={() => {
-            setOpen(false);
-            setEnterQuantityWarning(false);
-          }}
-          height={308}
-          item={selectedItem}
-          quantity={quantity}
-          setQuantity={setQuantity}
-          onSave={() => {
-            onSave(selectedItem, quantity);
-          }}
-          enterQuantityWarning={enterQuantityWarning}
+        <FilterBottomSheet
+          visible={filterOpen}
+          onClose={() => setFilterOpen(false)}
+          height={170}
+          setFilter={setFilter}
         />
-      </View>
-
-      <FilterBottomSheet
-        visible={filterOpen}
-        onClose={() => setFilterOpen(false)}
-        height={170}
-        setFilter={setFilter}
-      />
-      <SortBottomSheet
-        visible={sortOpen}
-        onClose={() => setSortOpen(false)}
-        height={170}
-      />
-    </SafeAreaView>
+        <SortBottomSheet
+          visible={sortOpen}
+          onClose={() => setSortOpen(false)}
+          height={120}
+        />
+      </PageBody>
+    </View>
   );
 }
 
@@ -328,6 +409,7 @@ const styles = StyleSheet.create({
   },
 
   SubmitOsa: {
+    flex: 1,
     position: "absolute",
     left: 0,
     right: 0,

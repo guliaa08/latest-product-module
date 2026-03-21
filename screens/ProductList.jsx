@@ -1,4 +1,4 @@
-import { timeAgo, TimeAgo } from "../helper/time_ago/TimeAgo";
+import { timeAgo } from "../helper/time_ago/TimeAgo";
 import { useState, useEffect, act, useRef } from "react";
 import { NumberConversion } from "../helper/number_converter/NumberConverter";
 import {
@@ -7,14 +7,10 @@ import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   ActivityIndicator,
-  Dimensions,
-  useColorScheme,
   BackHandler,
   Image,
-  Pressable,
 } from "react-native";
 import {
   get_activeProducts,
@@ -26,21 +22,15 @@ import { get_user_verify } from "../redux/productUser/actions";
 import { get_osaRequests } from "../redux/product/action";
 import Card from "../components/common/organisms/Card";
 import OSARequests from "./OsaRequests";
+import { PageBody } from "../components/common/Layout";
+import AppHeader from "../components/common/atoms/AppHeader";
 
 const ProductList = ({ navigation }) => {
   const retryCount = useRef(0);
   const retryInterval = useRef(null);
-  const appColor =
-    useSelector((state) => state?.productAppTheme?.appColor) || {};
+  const { appColor } = useSelector((state) => state?.productAppTheme);
   const authKey = useSelector((state) => state.productAppAuth.authKey || null);
   const dispatch = useDispatch();
-
-  const gap = 8;
-  const padding = 16;
-  const screenWidth = Dimensions.get("window").width - (gap + padding * 2);
-
-  const store = useSelector((state) => state); // see FULL state shape
-  console.log("FULL STATE:", JSON.stringify(Object.keys(store)));
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -51,28 +41,17 @@ const ProductList = ({ navigation }) => {
   const [viewMode, setViewMode] = useState("categories"); // 👈 NEW
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const productState = useSelector((state) => state?.productAppProduct || {});
+  const [cards, setCards] = useState([
+    { title: "Active Products" },
+    { title: "On Shelf Yesterday" },
+  ]);
 
   const {
     products: list,
     categories: tempCategories,
     dashboardMetrics: tempDashboardMetrics,
     osaRequests: tempOsaRequests,
-  } = productState;
-
-  console.log("the product state log", productState);
-  // const {
-  //   products: list,
-  //   categories: tempCategories,
-  //   dashboardMetrics: tempDashboardMetrics,
-  //   osaRequests: tempOsaRequests,
-  // } = useSelector((state) => state.productAppProduct);
-
-  // const { categories } = useSelector(state => state.categories);
-  const user = useSelector((state) => state.productAppUser || {});
-  console.log({ user });
-  const { isLoadingUser, isValidUser } = user;
+  } = useSelector((state) => state.productAppProduct);
 
   /* ---------------- VERIFY USER ---------------- */
   useEffect(() => {
@@ -82,15 +61,10 @@ const ProductList = ({ navigation }) => {
   /* ---------------- GET PRODUCTS ---------------- */
   useEffect(() => {
     if (!authKey) {
-      console.log("⏳ Waiting for authKey...");
       return;
     }
 
-    console.log("✅ authKey available, starting API calls");
-
     const fetchData = () => {
-      console.log(`🚀 Fetch attempt ${retryCount.current + 1}`);
-
       dispatch(get_categories());
       dispatch(get_activeProducts());
       dispatch(get_osaRequests());
@@ -104,10 +78,7 @@ const ProductList = ({ navigation }) => {
       retryInterval.current = setInterval(() => {
         retryCount.current += 1;
 
-        console.log(`🔁 Retry attempt ${retryCount.current}`);
-
         if (retryCount.current >= 5) {
-          console.log("❌ Max retries reached. Stopping.");
           clearInterval(retryInterval.current);
           retryInterval.current = null;
           return;
@@ -127,8 +98,6 @@ const ProductList = ({ navigation }) => {
 
   useEffect(() => {
     if (categories && categories.length > 0) {
-      console.log("✅ Data received. Stopping retries.");
-
       if (retryInterval.current) {
         clearInterval(retryInterval.current);
         retryInterval.current = null;
@@ -136,21 +105,36 @@ const ProductList = ({ navigation }) => {
     }
   }, [categories]);
 
-  /* ---------------- PROCESS DATA ---------------- */
+  useEffect(() => {
+    if (dashboardMetrics) {
+      const data = cards.map((card) => {
+        if (card.title == "Active Products")
+          return {
+            title: "Active Products",
+            count: dashboardMetrics.activeProducts,
+            iconName: "check",
+            iconColor: "green",
+            syncTime: 3,
+          };
+        if (card.title == "On Shelf Yesterday") {
+          return {
+            title: "On Shelf Yesterday",
+            count: dashboardMetrics.onShelfYesterdayPerc + "%",
+            subTitleColor: "red",
+            subCount: `${NumberConversion(
+              dashboardMetrics.totalOnShelfYesterdayCount,
+            )}/ ${NumberConversion(dashboardMetrics.totalStockYesterdayCount)}`,
+            subTitle: `${Math.round(
+              dashboardMetrics.missingOnShelfYesterdayPercent,
+            )}% missing`,
+          };
+        }
+      });
 
-  // useEffect(() => {
-  //   if (list) {
-  //     const data = list.map(item => ({
-  //       ...item,
-  //       productImage:
-  //         'https://img.freepik.com/premium-photo/top-view-white-sliced-toast-bread-white_711700-14041.jpg',
-  //     }));
+      setCards(data);
+    }
+  }, [dashboardMetrics]);
 
-  //     // setProducts(data);
-  //     // setFilteredProducts(data);
-  //     setLoading(false);
-  //   }
-  // }, [list]);
   useEffect(() => {
     if (tempOsaRequests) {
       setOsaRequests(tempOsaRequests);
@@ -172,17 +156,8 @@ const ProductList = ({ navigation }) => {
   /* ---------------- CATEGORY CLICK ---------------- */
   const handleCategoryPress = (categoryName) => {
     setSelectedCategory(categoryName);
-
-    dispatch(get_products(categoryName));
-
+    dispatch(get_products({ categoryName, page: 1 }));
     navigation.navigate("ProductsPerCategory", { categoryName });
-
-    // const filtered = products.filter(
-    //   item => item.categoryName === categoryName
-    // );
-
-    // setFilteredProducts(filtered);
-    // setViewMode("products");
   };
 
   /* ---------------- BACK HANDLER ---------------- */
@@ -216,14 +191,16 @@ const ProductList = ({ navigation }) => {
 
     return (
       <TouchableOpacity
-        style={styles.card}
+        style={[styles.card, { borderColor: appColor.grey.border }]}
         onPress={() => handleCategoryPress(item.categoryName)}
       >
         <View style={styles.rowBetween}>
-          <Text style={styles.categoryTitle}>{item.categoryName}</Text>
+          <Text style={[styles.categoryTitle, { color: appColor.text.dark }]}>
+            {item.categoryName}
+          </Text>
 
           <View style={{ alignItems: "flex-end" }}>
-            <Text style={styles.stockText}>
+            <Text style={[styles.stockText, { color: appColor.text.light }]}>
               {item.totalOsa}/{item.totalStock}
             </Text>
             <Text style={styles.percentageText}>
@@ -266,7 +243,9 @@ const ProductList = ({ navigation }) => {
             {" "}
             ₹{parseFloat(item.price).toFixed(2) + 5}{" "}
           </Text>
-          <Text style={styles.percentageOff}>{item.percentageOff} OFF</Text>
+          <Text style={styles.percentageOff(appColor)}>
+            {item.percentageOff} OFF
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -276,66 +255,56 @@ const ProductList = ({ navigation }) => {
 
   if (!authKey) {
     return (
-      <View style={styles.centerContainer}>
+      <PageBody style={styles.centerContainer}>
         <ActivityIndicator size="large" />
-        <Text>Loading session...</Text>
-      </View>
+        <Text style={{color:appColor.text.dark}} >Loading session...</Text>
+      </PageBody>
     );
   }
-
   return (
-    <SafeAreaView style={[styles.container, { padding: padding }]}>
+    <PageBody style={[styles.container, { padding: 16 }]}>
       {/* Top Cards */}
-      <View style={{ flexDirection: "row", gap: gap }}>
-        <View style={{ width: screenWidth / 2, height: 98 }}>
-          {dashboardMetrics && (
+      <View style={{ flexDirection: "row", gap: 8 }}>
+        {cards.map((item, index) => {
+          return (
             <Card
-              iconName={"check"}
-              iconColor={"green"}
-              title="Active Products"
-              syncTime={4}
-              count={dashboardMetrics.activeProducts}
+              key={index}
+              title={item.title}
+              count={item.count}
+              syncTime={item.syncTime}
+              iconName={item.iconName}
+              iconColor={item.iconColor}
+              subTitle={item.subTitle}
+              subTitleColor={item.subTitleColor}
+              subCount={item.subCount}
             />
-          )}
-        </View>
-        <View style={{ width: screenWidth / 2, height: 98 }}>
-          {dashboardMetrics && (
-            <Card
-              title="On Shelf Yesterday"
-              subTitle={`${Math.round(
-                dashboardMetrics.missingOnShelfYesterdayPercent,
-              )}% missing`}
-              subTitleColor={"red"}
-              count={`${Math.round(dashboardMetrics.onShelfYesterdayPerc)}%`}
-              subCount={`${NumberConversion(
-                dashboardMetrics.totalOnShelfYesterdayCount,
-              )}/ ${NumberConversion(
-                dashboardMetrics.totalStockYesterdayCount,
-              )}`}
-            />
-          )}
-        </View>
+          );
+        })}
       </View>
-      <View style={{}}>
+      <>
         {osaRequests && osaRequests.total == 1 ? (
           <OSARequests
             title="New OSA Request"
+            request={osaRequests.data[0]}
             subTitle={`${osaRequests.data[0].products} items to be scanned `}
             time={timeAgo(osaRequests.data[0].createdAt)}
             btnText={"Start Scan"}
+            navigation={navigation}
           />
         ) : osaRequests.total > 1 ? (
           <OSARequests
             title={`${osaRequests.total} New OSA Requests`}
             time={timeAgo(osaRequests.data[0].createdAt)}
             btnText={"View"}
+            navigation={navigation}
           />
-        ) : (
-          <View></View>
-        )}
-      </View>
+        ) : null}
+      </>
 
-      <StatusBar barStyle="dark-content" />
+      <StatusBar
+        backgroundColor={appColor.background}
+        barStyle={"light-content"}
+      />
 
       <View style={{ flex: 1 }}>
         {loading ? (
@@ -350,16 +319,41 @@ const ProductList = ({ navigation }) => {
               return <View style={{ height: 8 }}></View>;
             }}
             renderItem={renderCategoryItem}
+            showsVerticalScrollIndicator={false}
             ListHeaderComponent={
-              <View style={styles.tableHeader}>
-                <Text style={styles.headerText}>Category</Text>
-                <Text style={styles.headerText}>Stock / OSA</Text>
+              <View
+                style={{
+                  marginBottom: 8,
+                  backgroundColor: appColor.background,
+                }}
+              >
+                <View
+                  style={[
+                    styles.tableHeader,
+                    {
+                      backgroundColor: appColor.background,
+                      borderWidth: 1,
+                      borderColor: appColor.grey.border,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[styles.headerText, { color: appColor.text.dark }]}
+                  >
+                    Category
+                  </Text>
+                  <Text
+                    style={[styles.headerText, { color: appColor.text.dark }]}
+                  >
+                    Stock / OSA
+                  </Text>
+                </View>
               </View>
             }
           />
         )}
       </View>
-    </SafeAreaView>
+    </PageBody>
   );
 };
 
@@ -370,7 +364,8 @@ export default ProductList;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 8,
+    // backgroundColor: 'black',
     gap: 12,
   },
   centerContainer: {
@@ -390,12 +385,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   card: {
-    backgroundColor: "#fff",
-    // margin: 10,
     padding: 15,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#eee",
   },
   rowBetween: {
     flexDirection: "row",
@@ -409,17 +401,12 @@ const styles = StyleSheet.create({
   productTitle: {
     fontSize: 14,
   },
-  stockText: {
-    fontSize: 14,
-  },
+
   percentageText: {
     fontSize: 12,
     color: "#169E48",
   },
-  backBtn: {
-    padding: 15,
-    backgroundColor: "#fff",
-  },
+
   banner: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -439,7 +426,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
     margin: 8,
     borderRadius: 12,
     overflow: "hidden",
@@ -499,10 +485,12 @@ const styles = StyleSheet.create({
   productPriceStike: {
     fontSize: 10,
   },
-  percentageOff: {
-    fontSize: 10,
-    color: "#169E48",
-  },
+  percentageOff: (appColor) => [
+    {
+      fontSize: 10,
+      color: "#169E48",
+    },
+  ],
   productWeight: {
     fontSize: 10,
   },
@@ -525,7 +513,7 @@ const styles = StyleSheet.create({
   },
   stockText: {
     fontSize: 12,
-    color: "#666",
+
     fontWeight: "500",
   },
 });

@@ -8,7 +8,6 @@ import ProductNavigator from "./navigation/ProductNavigator.jsx";
 
 function App(props) {
   const isDarkMode = useColorScheme() === "light";
-  console.log(props, "ther props at app");
 
   return (
     <Provider store={store}>

@@ -37,7 +37,6 @@ const productAppProductSlice = createSlice({
     builder.addCase(get_categories.fulfilled, (state, action) => {
       state.isLoadingCategories = false;
       state.categories = action.payload.data;
-      console.log(state.categories, "the categories set at state");
     });
     builder.addCase(get_categories.rejected, (state) => {
       state.isLoadingCategories = false;

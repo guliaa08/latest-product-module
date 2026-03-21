@@ -14,32 +14,35 @@ export default function Card({
   subTitleColor,
   subCount,
 }) {
-   const appColor = useSelector((state) => state?.productAppTheme?.appColor) || {};
+  const { appColor } = useSelector((state) => state?.productAppTheme);
 
   return (
-    <PageBody style={styles.container}>
-      <Text style={[{ color: appColor.text.light }, styles.title]}>
-        {title} <Icon size={16} color={iconColor} name={"chevron-right"} />{" "}
-      </Text>
+    <PageBody style={styles.container(appColor)}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Text style={[{ color: appColor.text.light }, styles.title]}>
+          {title}
+        </Text>
+        <Icon size={10} color={iconColor} name={"chevron-right"} />{" "}
+      </View>
       <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
-        <Text style={[{ color: appColor.text.light }, styles.count]}>{count}</Text>
+        <Text style={[{ color: appColor.text.light }, styles.count]}>
+          {count}
+        </Text>
         <Text style={{ letterSpacing: -1, color: appColor.text.light }}>
           {subCount && subCount}
         </Text>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
         {iconName && <Icon size={10} color={iconColor} name={iconName} />}
-        {
-          syncTime ? (
-            <Text style={[{ color: appColor.text.light }, styles.subTitle]}>
-              Sync {syncTime}h ago
-            </Text>
-          ) : (
-            <Text style={[{ color: subTitleColor }, styles.subTitle]}>
-              {subTitle}
-            </Text>
-          ) //sub title and color and icons and icon color
-        }
+        {syncTime ? (
+          <Text style={[{ color: appColor.text.light }, styles.subTitle]}>
+            Sync {syncTime}h ago
+          </Text>
+        ) : (
+          <Text style={[{ color: subTitleColor }, styles.subTitle]}>
+            {subTitle}
+          </Text>
+        )}
       </View>
     </PageBody>
   );
@@ -47,17 +50,19 @@ export default function Card({
 
 const styles = StyleSheet.create({
   mainContainer: {},
-  container: {
+  container: (appColor) => ({
     padding: 16,
     gap: 4,
     borderRadius: 12,
-    // borderWidth:1,
+    borderWidth: 1,
     justifyContent: "center",
     paddingStart: 20,
-    // borderWidth:1,
-  },
+    borderWidth: 1,
+    borderColor: appColor.grey.border,
+  }),
   title: {
     fontSize: 12,
+    lineHeight: 16,
   },
   count: {
     fontSize: 28,

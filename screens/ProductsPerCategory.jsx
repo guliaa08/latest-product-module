@@ -154,12 +154,14 @@ export default function ProductsPerCategory({ route, navigation }) {
               subTitle={`${osaRequests.data[0].products} items to be scanned `}
               time={timeAgo(osaRequests.data[0].createdAt)}
               btnText={"Start Scan"}
+              navigation={navigation}
             />
           ) : osaRequests.total > 1 ? (
             <OSARequests
               title={`${osaRequests.total} New OSA Requests`}
               time={timeAgo(osaRequests.data[0].createdAt)}
               btnText={"View"}
+              navigation={navigation}
             />
           ) : (
             <View></View>
