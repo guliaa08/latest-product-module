@@ -16,7 +16,7 @@ import Card from "../components/common/organisms/Card";
 import { NumberConversion } from "../helper/number_converter/NumberConverter";
 import OSARequests from "./OsaRequests";
 
-export default function ProductsPerCategory({ route }) {
+export default function ProductsPerCategory({ route, navigation }) {
   const gap = 8;
   const padding = 16;
   const screenWidth = Dimensions.get("window").width - (gap + padding * 2);
@@ -107,9 +107,7 @@ export default function ProductsPerCategory({ route }) {
             {" "}
             ₹{parseFloat(item.price).toFixed(2) + 5}{" "}
           </Text>
-          <Text style={styles.percentageOff}>
-            {item.percentageOff} OFF
-          </Text>
+          <Text style={styles.percentageOff}>{item.percentageOff} OFF</Text>
         </View>
       </View>
     </TouchableOpacity>
