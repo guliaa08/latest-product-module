@@ -213,9 +213,7 @@ const ProductList = ({ navigation }) => {
             {" "}
             ₹{parseFloat(item.price).toFixed(2) + 5}{" "}
           </Text>
-          <Text style={styles.percentageOff(color)}>
-            {item.percentageOff} OFF
-          </Text>
+          <Text style={styles.percentageOff}>{item.percentageOff} OFF</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -439,12 +437,10 @@ const styles = StyleSheet.create({
   productPriceStike: {
     fontSize: 10,
   },
-  percentageOff: (color) => [
-    {
-      fontSize: 10,
-      color: "#169E48",
-    },
-  ],
+  percentageOff: {
+    fontSize: 10,
+    color: "#169E48",
+  },
   productWeight: {
     fontSize: 10,
   },

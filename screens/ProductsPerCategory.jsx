@@ -107,7 +107,7 @@ export default function ProductsPerCategory({ route }) {
             {" "}
             ₹{parseFloat(item.price).toFixed(2) + 5}{" "}
           </Text>
-          <Text style={styles.percentageOff(color)}>
+          <Text style={styles.percentageOff}>
             {item.percentageOff} OFF
           </Text>
         </View>
@@ -274,12 +274,10 @@ const styles = StyleSheet.create({
   productPriceStike: {
     fontSize: 10,
   },
-  percentageOff: (color) => [
-    {
-      fontSize: 10,
-      color: "#169E48",
-    },
-  ],
+  percentageOff: {
+    fontSize: 10,
+    color: "#169E48",
+  },
   productWeight: {
     fontSize: 10,
   },
