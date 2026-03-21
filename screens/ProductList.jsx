@@ -1,5 +1,5 @@
 import { timeAgo, TimeAgo } from "../helper/time_ago/TimeAgo";
-import { useState, useEffect, act } from "react";
+import { useState, useEffect, act, useRef } from "react";
 import { NumberConversion } from "../helper/number_converter/NumberConverter";
 import {
   View,
@@ -28,8 +28,11 @@ import Card from "../components/common/organisms/Card";
 import OSARequests from "./OsaRequests";
 
 const ProductList = ({ navigation }) => {
+  const retryCount = useRef(0);
+  const retryInterval = useRef(null);
   const appColor =
     useSelector((state) => state?.productAppTheme?.appColor) || {};
+  const authKey = useSelector((state) => state.productAppAuth.authKey || null);
   const dispatch = useDispatch();
 
   const gap = 8;
@@ -78,10 +81,60 @@ const ProductList = ({ navigation }) => {
 
   /* ---------------- GET PRODUCTS ---------------- */
   useEffect(() => {
-    dispatch(get_categories());
-    dispatch(get_activeProducts());
-    dispatch(get_osaRequests());
-  }, []);
+    if (!authKey) {
+      console.log("⏳ Waiting for authKey...");
+      return;
+    }
+
+    console.log("✅ authKey available, starting API calls");
+
+    const fetchData = () => {
+      console.log(`🚀 Fetch attempt ${retryCount.current + 1}`);
+
+      dispatch(get_categories());
+      dispatch(get_activeProducts());
+      dispatch(get_osaRequests());
+    };
+
+    // First call
+    fetchData();
+
+    // Start retry loop
+    if (!retryInterval.current) {
+      retryInterval.current = setInterval(() => {
+        retryCount.current += 1;
+
+        console.log(`🔁 Retry attempt ${retryCount.current}`);
+
+        if (retryCount.current >= 5) {
+          console.log("❌ Max retries reached. Stopping.");
+          clearInterval(retryInterval.current);
+          retryInterval.current = null;
+          return;
+        }
+
+        fetchData();
+      }, 5000);
+    }
+
+    return () => {
+      if (retryInterval.current) {
+        clearInterval(retryInterval.current);
+        retryInterval.current = null;
+      }
+    };
+  }, [authKey]);
+
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      console.log("✅ Data received. Stopping retries.");
+
+      if (retryInterval.current) {
+        clearInterval(retryInterval.current);
+        retryInterval.current = null;
+      }
+    }
+  }, [categories]);
 
   /* ---------------- PROCESS DATA ---------------- */
 
@@ -220,6 +273,15 @@ const ProductList = ({ navigation }) => {
   );
 
   /* ===================== UI ===================== */
+
+  if (!authKey) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" />
+        <Text>Loading session...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={[styles.container, { padding: padding }]}>
