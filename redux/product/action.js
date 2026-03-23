@@ -5,10 +5,15 @@ import { endpoints } from "../../utils/end_points/urls";
 export const get_products = createAsyncThunk(
   "get_products",
   async (_params, thunkApi) => {
+    console.log('params from get products ',_params);
+      const {categoryName,page}= _params;
     try {
       const data = await api.get("store-inventory/", {
         params: {
-          categoryName: _params,
+          categoryName: categoryName,
+          page:page,
+          limit:10
+
         },
       });
       return data;
