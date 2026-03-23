@@ -21,11 +21,24 @@ const productAppProductSlice = createSlice({
       state.isLoadingProducts = true;
     });
     builder.addCase(get_products.fulfilled, (state, action) => {
-      const { data, pagination, status } = action.payload;
-      state.isLoadingProducts = false;
-      state.products = data;
-      state.hasNextPage = pagination.hasNextPage;
+     const { data, pagination } = action.payload;
+console.log('page no: ',pagination.currentPage, "data: ", data);
+
+  state.isLoadingProducts = false;
+
+  // 👉 If first page → replace data
+  if (pagination.currentPage === 1) {
+    state.products = data;
+  } 
+  // 👉 If next pages → append data
+  else {
+    state.products = [...state.products, ...data];
+  }
+
+  // state.hasNextPage = pagination.hasNextPage;
+  state.productPagination = pagination;
     });
+    
     builder.addCase(get_products.rejected, (state) => {
       state.isLoadingProducts = false;
     });
