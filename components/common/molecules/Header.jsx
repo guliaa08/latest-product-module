@@ -5,10 +5,13 @@ import SearchBox from "../atoms/SearchBox"
 import { PageBody } from '../Layout';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon1 from 'react-native-vector-icons/Octicons';
+import { useSelector } from 'react-redux';
 
 export default function Header({setFilterOpen, filter, setSort, request}) {
+  const {appColor:color} = useSelector(state=>state.productAppTheme)
   return (
-    <PageBody>
+  
+
 
       <View style={[styles.headerContainer]}>
 
@@ -25,25 +28,24 @@ export default function Header({setFilterOpen, filter, setSort, request}) {
             </View>
             <View style={[{ height: 36 }]}>
 
-              <Text style={[styles.spencers]}>Spencers</Text>
+              <Text style={[styles.spencers,{color:color.text.dark}]}>Spencers</Text>
               <View style={[{ flexDirection: "row", height: 16, }]}>
 
 
-                <Text style={[{ fontSize: 12, fontWeight: 400, lineHeight: 16, }]}>by AIRAops</Text>
+                <Text style={[{ fontSize: 12, fontWeight: 400, lineHeight: 16,color:color.text.dark }]}>by AIRAops</Text>
               </View>
             </View>
           </View>
           <View style={[{ flexDirection: "row", gap: 4, height:32 }]}>
-            <Pressable onPress={()=>setFilterOpen(true)} style={[styles.filterContainer]}>
-              <Text style={[styles.filter]}>Filter</Text>
-              <Icon name={"keyboard-arrow-down"} size={16} color="black" />
+            <Pressable onPress={()=>setFilterOpen(true)} style={[styles.filterContainer(color)]}>
+              <Text style={[styles.filter(color)]}>Filter</Text>
+              <Icon name={"keyboard-arrow-down"} size={16} color={color.text.regular} />
          { filter != "both" && <Icon1 style={{ position:"absolute", top:0, right:0 }}  name={"dot-fill"} size={16} color="black" /> }
 
             </Pressable>
-            <Pressable onPress={()=>setSort(true)} style={[styles.filterContainer]}>
-              <Text style={[styles.filter]}>Sort</Text>
-              <Icon name={"sort"} size={16} color="black" />
-
+            <Pressable onPress={()=>setSort(true)} style={[styles.filterContainer(color)]}>
+              <Text style={[styles.filter(color)]}>Sort</Text>
+              <Icon name={"sort"} size={16} color={color.text.regular} />
 
             </Pressable>
             {/* <View style={[styles.moreVertical]}>
@@ -58,7 +60,7 @@ export default function Header({setFilterOpen, filter, setSort, request}) {
           <SearchBox request={request} />
         </View>
       </View>
-    </PageBody>
+
   );
 }
 const styles = StyleSheet.create({
@@ -77,6 +79,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     height: 120,
     paddingTop: 12,
+    paddingHorizontal:8,
     gap: 12,
 
   },
@@ -100,26 +103,28 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 12,
     borderBottomRightRadius: 12
   },
-  filter: {
+  filter: (color)=>[{
     fontSize: 12,
     fontWeight: 400,
     lineHeight: 16,
     textAlign: "center",
-    color: "#454545"
+    color:color.text.regular,
 
-  },
-  filterContainer: {
+
+  }],
+  filterContainer: (color)=>[{
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     height: 32,
     borderRadius: 6,
     borderWidth: 1,
+    borderColor:color.grey.disabled,
     paddingVertical: 6,
     paddingRight: 8,
     paddingLeft: 10,
     gap: 4
-  },
+  }],
   moreVertical: {
     justifyContent: "center",
     alignItems: "center",

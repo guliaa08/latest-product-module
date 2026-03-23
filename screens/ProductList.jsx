@@ -282,23 +282,28 @@ const ProductList = ({ navigation }) => {
         })}
       </View>
       <>
+
+
         {osaRequests && osaRequests.total == 1 ? (
           <OSARequests
-            title="New OSA Request"
-            request={osaRequests.data[0]}
-            subTitle={`${osaRequests.data[0].products} items to be scanned `}
-            time={timeAgo(osaRequests.data[0].createdAt)}
-            btnText={"Start Scan"}
-            navigation={navigation}
+          title="New OSA Request"
+          request={osaRequests.data[0]}
+          subTitle={`${osaRequests.data[0].products} items to be scanned `}
+          time={timeAgo(osaRequests.data[0].createdAt)}
+          btnText={"Start Scan"}
+         
+          navigation={navigation}
           />
         ) : osaRequests.total > 1 ? (
           <OSARequests
-            title={`${osaRequests.total} New OSA Requests`}
-            time={timeAgo(osaRequests.data[0].createdAt)}
-            btnText={"View"}
-            navigation={navigation}
+          title={`${osaRequests.total} New OSA Requests`}
+          time={timeAgo(osaRequests.data[0].createdAt)}
+          btnText={"View"}
+          navigation={navigation}
+           backgroundColor={appColor?.primaryColor?.background}
           />
         ) : null}
+
       </>
 
       <StatusBar
