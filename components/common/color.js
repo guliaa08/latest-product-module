@@ -34,7 +34,7 @@ export const COLOR_SCHEMES = Object.freeze({
     text: {
       light: '#808080',
       regular: '#454545',
-      dark: '#000000',
+      dark: '#0c0404',
     },
     primaryColor: {
       background: '#F3F8FF',
@@ -69,7 +69,7 @@ export const COLOR_SCHEMES = Object.freeze({
     emptyComponentBackgroundColor: '#FCFCFC',
   },
   [COLOR_SCHEME_DARK]: {
-    icon: '#FFFFFF',
+    icon: '#000000',
     background: '#000000',
 
     text: {

@@ -6,12 +6,13 @@ import useDebounce from '../../../hooks/useDebounce';
 import { get_osaListSearch } from '../../../redux/osa/action';
 import { get_osaList } from '../../../redux/osa/action';
 import { setSearch } from '../../../redux/osa/reducers';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 export default function SearchBox({request}) {
   const [text, setText] = useState('');
   const debouncedText = useDebounce(text, 500);
   const dispatch = useDispatch();
+  const {appColor} = useSelector(state=>state.productAppTheme)
 
   useEffect(() => {
     
@@ -19,8 +20,8 @@ export default function SearchBox({request}) {
     dispatch(get_osaList({ request, params: { page: 1 } }));
   }, [debouncedText]);
   return (
-    <PageBody>
-      <View style={styles.inputContainer}>
+ 
+      <View style={styles.inputContainer(appColor)}>
         <View style={styles.left}>
           <Icon name="search" size={20} color={'black'} />
           <View style={[{ flex: 1, width: '100%' }]}>
@@ -38,24 +39,24 @@ export default function SearchBox({request}) {
           <Text style={[styles.ScanText]}>Scan</Text>
         </View> */}
       </View>
-    </PageBody>
+   
   );
 }
 
 const styles = StyleSheet.create({
-  inputContainer: {
+  inputContainer:(appColor)=>( {
     flexDirection: 'row',
     justifyContent: 'space-between',
     height: 48,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#C5C5C5',
+    borderColor: appColor.grey.disabled,
     padding: 4,
     paddingLeft: 10,
     gap: 8,
 
     borderWidth: 1,
-  },
+  }),
   left: {
     flexDirection: 'row',
     justifyContent: 'center',

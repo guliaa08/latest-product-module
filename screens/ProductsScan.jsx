@@ -37,11 +37,12 @@ import AddQuantity from "../components/common/molecules/AddQuantity";
 import FilterBottomSheet from "../components/common/molecules/FilterBottomSheet";
 import SortBottomSheet from "../components/common/molecules/SortBottomSheet";
 import Loader from "../components/common/atoms/Loader";
-import AppHeader from "../components/common/atoms/AppHeader";
+import { isDisabled } from "react-native/types_generated/Libraries/LogBox/Data/LogBoxData";
 
 export default function ProductsScan({ route }) {
+  console.log("item from prop", route.params.request);
   const { request } = route.params;
-  const { appColor } = useSelector((state) => state?.productAppTheme);
+  const { appColor: color } = useSelector((state) => state.productAppTheme);
   const [open, setOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
@@ -93,12 +94,14 @@ export default function ProductsScan({ route }) {
   useEffect(() => {
     if (tempPending) {
       setOsaRequests(tempPending);
+      console.log("temporary osa", tempPending);
     }
   }, [tempPending]);
 
   useEffect(() => {
     if (tempScanned) {
       setOsaScanned(tempScanned);
+      console.log("temporary osa scanned products", tempScanned);
     }
   }, [tempScanned]);
 
@@ -107,6 +110,7 @@ export default function ProductsScan({ route }) {
   };
 
   const addManually = (item) => {
+    // console.log('item form add manually', item);
     setSelectedItem(item);
     setOpen(true);
   };
@@ -126,14 +130,35 @@ export default function ProductsScan({ route }) {
   };
 
   const submitOSA = async (osaRequests, osaScanned) => {
+    console.log("requesti id ", requestId);
     if (osaScanned.total + osaRequests.total != osaScanned.total) {
       return;
     }
+
     await dispatch(submit_OSA({ requestId }));
     navigation.goBack();
+    // if((osaScanned?.data?.length != osaRequests?.data?.length+ osaScanned?.data?.length)) { Alert.alert("bhai pure kar le phle"); return;}
+
+    // Alert.alert('working on this.');
+    // console.log('osa request', requestId);
+    // console.log('osa request', osaScanned);
+    // const result = await dispatch(
+    //   post_osaList({
+    //     requestId: requestId,
+    //     // items: osaScanned.data,
+    //     items: scannedDisplay,
+    //   }),
+    // ).unwrap();
+    // dispatch(resetScannedDisplay());
+    // console.log('API Success:', result);
+
+    // Alert.alert('OSA submitted successfully');
+
+    // navigation.goBack();
   };
 
   const onSave = async (item, quantity) => {
+    console.log("item on onSave", item);
 
     if (!(quantity >= 0)) {
       setEnterQuantityWarning(true);
@@ -250,7 +275,7 @@ export default function ProductsScan({ route }) {
                   // fontFamily: fonts.font_700,
                   fontSize: 16,
                   lineHeight: 20,
-                  color: appColor.text.dark,
+                  color: color.text.dark,
                 }}
               >
                 Roles
@@ -260,11 +285,11 @@ export default function ProductsScan({ route }) {
         );
       },
     });
-  }, [navigation, dispatch, appColor]);
+  }, [navigation, dispatch, color]);
 
   return (
     <View style={{ flex: 1 }}>
-      <PageBody>
+      <PageBody  style={{paddingHorizontal:0}}>
         <View style={styles.container}>
           <View style={{ height: 120 }}>
             <Header
@@ -284,7 +309,7 @@ export default function ProductsScan({ route }) {
                     fontWeight: 700,
                     fontSize: 16,
                     lineHeight: 20,
-                    color: appColor.text.regular,
+                    color: color.text.regular,
                   }}
                 >
                   Pending items
@@ -324,7 +349,7 @@ export default function ProductsScan({ route }) {
                     fontWeight: 700,
                     fontSize: 16,
                     lineHeight: 20,
-                    color: appColor.text.regular,
+                    color: color.text.regular,
                   }}
                 >
                   Scanned items
@@ -406,13 +431,17 @@ export default function ProductsScan({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+
+   
   },
 
   SubmitOsa: {
-    flex: 1,
+ 
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
+  
+     
   },
 });

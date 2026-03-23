@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useSelector } from "react-redux";
+import { useNavigation } from '@react-navigation/native';
 
 const OSARequests = ({
   title,
@@ -7,8 +8,12 @@ const OSARequests = ({
   time,
   btnText,
   request,
-  navigation,
+  backgroundColor
+  // navigation,
 }) => {
+  console.log('backgroiund color', backgroundColor);
+  
+  const navigation = useNavigation();
   const { appColor } = useSelector((state) => state?.productAppTheme);
   const handlePress = () => {
     if (btnText !== "View") {
@@ -21,7 +26,7 @@ const OSARequests = ({
     <View
       style={[
         styles.banner,
-        { backgroundColor: appColor.background, borderColor: appColor.grey.border },
+        { backgroundColor: backgroundColor || 'transparent', borderColor: appColor.grey.border },
       ]}
     >
       <View style={styles.leftSection}>

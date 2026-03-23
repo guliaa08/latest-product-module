@@ -32,13 +32,14 @@ import BottomSheet from '../components/common/atoms/BottomSheet';
 import { post_osaList } from '../redux/osa/action';
 
 export default function Scanner({ route }) {
+  console.log('item from prop', route.params.item);
   const { item, requestId } = route.params;
   const navigation = useNavigation();
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back');
   const [scanned, setScanned] = useState(false);
   const [permissionRequested, setPermissionRequested] = useState(false);
-  const insets = useSafeAreaInsets();
+
   const [eanCode, setEancode] = useState();
   const [quantity, setQuantity] = useState(0);
   const [open, setOpen] = useState(false);
@@ -121,9 +122,10 @@ export default function Scanner({ route }) {
 
           setAlertMessage(true);
         }
+        console.log('Barcode:', value);
         setTimeout(() => {
           scanLock.current = false;
-        }, 1500);
+        }, 1500); // allow scanning again after 1.5s
       }
     },
   });
@@ -136,6 +138,7 @@ export default function Scanner({ route }) {
   }
 
   const onSave = async (item, quantity) => {
+    console.log('onsave', item);
     dispatch(
       addScannedItem({
         productId: item.productId,
@@ -164,8 +167,8 @@ export default function Scanner({ route }) {
     return;
   };
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 ,  }}>
+      <View style={{ flex: 1,  }}>
         <Camera
           style={StyleSheet.absoluteFill}
           device={device}
@@ -204,7 +207,7 @@ export default function Scanner({ route }) {
       <View
         style={{
           position: 'absolute',
-          top: insets.top,
+        
           left: 0,
           flexDirection: 'row',
           justifyContent: 'space-between',
@@ -250,13 +253,13 @@ export default function Scanner({ route }) {
         }}
         height={80}
       >
-        <View style={{ padding: 12, marginBottom: insets.bottom }}>
+        <View style={{ padding: 12, }}>
           <Text style={{ textAlign: 'center', fontWeight: '600' }}>
             Product is not matching.
-          </Text>
+      </Text>
         </View>
       </BottomSheet>
-    </SafeAreaView>
+    </View>
   );
 }
 

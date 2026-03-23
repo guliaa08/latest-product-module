@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useSelector } from 'react-redux';
 
 export default function OsaScanProduct({
   photo,
@@ -12,22 +13,26 @@ export default function OsaScanProduct({
   itemsOnShelf
 }) {
 
+  const {appColor:color}= useSelector(state=>state.productAppTheme)
   
 
   return (
-    <View>
+    <View style={{
+    // borderRadius:12,borderWidth:1, borderColor:color.grey.border,padding:12
+
+    }}>
       
       {/* Product Card */}
-      <View style={styles.productsCard}>
+      <View style={styles.productsCard(color)}>
         <Image
           source={{ uri: photo }}
-          style={styles.productImage}
+          style={styles.productImage(color)}
         />
 
         <View style={styles.detailsContainer}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.weight}>{weight}</Text>
-          <Text style={styles.sku}>SKU: {sku}</Text>
+          <Text style={styles.title(color)}>{title}</Text>
+          <Text style={styles.weight(color)}>{weight}</Text>
+          <Text style={styles.sku(color)}>SKU: {sku}</Text>
         </View>
       </View>
 
@@ -35,17 +40,17 @@ export default function OsaScanProduct({
       <View style={styles.buttons}>
         {itemsOnShelf &&
        
-            <View style={[styles.itemsOnShelf, styles.button,{borderWidth:0}]}>
-                <Text style={styles.itemsOnShelfText}>On Shelf:<Text style={{fontWeight:"bold"}}> {itemsOnShelf}</Text></Text>
+            <View style={[styles.itemsOnShelf(color), styles.button,{borderWidth:0}]}>
+                <Text style={styles.itemsOnShelfText(color)}>On Shelf:<Text style={{fontWeight:"bold"}}> {itemsOnShelf}</Text></Text>
             </View>
        
         }
-        <Pressable style={styles.button} onPress={onAddManually}>
+        <Pressable style={styles.button(color)} onPress={onAddManually}>
           <Icon name="add" size={16} color="blue" />
           <Text style={styles.buttonText}>Add {!itemsOnShelf && "manually"}</Text>
         </Pressable>
 
-        <Pressable style={styles.button} onPress={onScan}>
+        <Pressable style={styles.button(color)} onPress={onScan}>
           <Icon name="qr-code-scanner" size={16} color="blue" />
           <Text style={styles.buttonText}>Scan</Text>
         </Pressable>
@@ -57,11 +62,11 @@ export default function OsaScanProduct({
 
 const styles = StyleSheet.create({
 
-  productsCard: {
+  productsCard: (color)=>({
     flexDirection: "row",
     gap: 12,
     padding: 12,
-  },
+  }),
 
   detailsContainer: {
     justifyContent: "center",
@@ -75,47 +80,49 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 
-  button: {
+  button: (color)=>[{
     flex: 1,
     justifyContent: "center",
     paddingVertical: 12,
     paddingHorizontal: 16,
     gap: 6,
-    borderWidth: .5,
+    borderWidth: 1,
+    borderColor:color.primaryColor.fill,
     borderRadius: 8,
     height: 40,
     flexDirection: "row",
-    alignItems: "center"
-  },
+    alignItems: "center",
+    
+  }],
 
-  productImage: {
+  productImage:(color)=>[ {
     height: 56,
     width: 56,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#f1f1f1"
-  },
+    borderColor: color.grey.border
+  }],
 
-  title: {
+  title:(color) =>[{
     fontSize: 12,
     fontWeight: "600",
     lineHeight: 16,
-    color: "#454545",
-  },
+    color:color.text.dark,
+  }],
 
-  weight: {
+  weight:(color)=>[ {
     fontWeight: "500",
     fontSize: 10,
     lineHeight: 12,
-    color: "#454545",
-  },
+    color:color.text.regular,
+  }],
 
-  sku: {
+  sku:(color)=>[ {
     fontSize: 10,
     fontWeight: "500",
     lineHeight: 12,
-    color: "#808080",
-  },
+    color: color.text.light
+  }],
 
   buttonText: {
     fontWeight: "600",
@@ -123,23 +130,25 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: "#2D64B8"
   },
-  itemsOnShelf:{
+  itemsOnShelf:(color)=>[{
     height:40,
     borderRadius:8,
     gap:8,
     justifyContent:"center",
     alignItems:"center",
-    backgroundColor:"#fcfcfc",
-    borderRadius:10
+    borderRadius:10,
+    backgroundColor:color.grey.background,
+    paddingHorizontal:12,
 
 
-  },
-  itemsOnShelfText:{
+  }],
+  itemsOnShelfText:(color)=>[{
     fontSize:12,
     fontWeight:400,
     lineHeight:16,
     height:16,
-    color:"#454545",
-  }
+    color:color.text.light,
+
+  }]
 
 });

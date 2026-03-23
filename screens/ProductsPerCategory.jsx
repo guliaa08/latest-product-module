@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     height: 124,
     padding: 12,
     borderWidth: 1,
-    borderColor: color.border,
+    borderColor: color.grey.border,
     gap: 12,
     borderRadius: 8,
 
