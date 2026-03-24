@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable, ActivityIndicator } from "react-native";
 import { useSelector } from "react-redux";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 
 const OSARequests = ({
   title,
@@ -8,11 +8,11 @@ const OSARequests = ({
   time,
   btnText,
   request,
-  backgroundColor
+  backgroundColor,loading
   // navigation,
 }) => {
-  console.log('backgroiund color', backgroundColor);
-  
+  console.log("backgroiund color", backgroundColor);
+
   const navigation = useNavigation();
   const { appColor } = useSelector((state) => state?.productAppTheme);
   const handlePress = () => {
@@ -24,27 +24,39 @@ const OSARequests = ({
   };
   return (
     <Pressable onPress={handlePress}>
-
-    <View
-      style={[
-        styles.banner,
-        { backgroundColor: backgroundColor || 'transparent', borderColor: appColor.grey.border },
-      ]}
+      <View
+        style={[
+          styles.banner,
+          {
+            backgroundColor: backgroundColor || "transparent",
+            borderColor: appColor.grey.border,
+          },
+        ]}
       >
-      <View style={styles.leftSection}>
-        <Text style={styles.title(appColor)}>{title && title}</Text>
-        {subTitle && <Text style={styles.subtitle(appColor)}>{subTitle}</Text>}
-        <Text style={styles.time}>{time && time}</Text>
-      </View>
+        {loading ? (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" />
+          </View>
+        ) : (
+          <>
+            <View style={styles.leftSection}>
+              <Text style={styles.title(appColor)}>{title && title}</Text>
+              {subTitle && (
+                <Text style={styles.subtitle(appColor)}>{subTitle}</Text>
+              )}
+              <Text style={styles.time}>{time && time}</Text>
+            </View>
 
-      <View >
-        <Text style={styles.startScanText}>
-          {btnText}
-          {">"}
-        </Text>
+            <View>
+              <Text style={styles.startScanText}>
+                {btnText}
+                {">"}
+              </Text>
+            </View>
+          </>
+        )}
       </View>
-    </View>
-      </Pressable>
+    </Pressable>
   );
 };
 
@@ -88,4 +100,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  centerContainer:{
+    flex:1,justifyContent:"center",alignItems:"center"
+  }
 });

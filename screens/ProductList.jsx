@@ -1,5 +1,5 @@
 import { timeAgo } from "../helper/time_ago/TimeAgo";
-import { useState, useEffect, act, useRef } from "react";
+import React, { useState, useEffect, act, useRef, useCallback } from "react";
 import { NumberConversion } from "../helper/number_converter/NumberConverter";
 import {
   View,
@@ -40,18 +40,53 @@ const ProductList = ({ navigation }) => {
   const [dashboardMetrics, setDashboardMetrics] = useState(null);
   const [viewMode, setViewMode] = useState("categories"); // 👈 NEW
   const [loading, setLoading] = useState(true);
+  const [loadingOsa, setLoadingOsa] = useState(true);
+  const [loadingCards, setLoadingCards] = useState(true);
   const [error, setError] = useState(null);
-  const [cards, setCards] = useState([
-    { title: "Active Products" },
-    { title: "On Shelf Yesterday" },
-  ]);
+  const [cards, setCards] = useState([]);
+  const onEndReachedCalledDuringMomentum = React.useRef(false);
 
   const {
     products: list,
     categories: tempCategories,
     dashboardMetrics: tempDashboardMetrics,
-    osaRequests: tempOsaRequests,
+    osaRequests: tempOsaRequests, categoryPagination, isLoadingCategories 
   } = useSelector((state) => state.productAppProduct);
+
+  const CARD_CONFIG = {
+    activeProducts: {
+      title: "Active Products",
+      getData: (metrics) => ({
+        count: metrics?.activeProducts ?? 0,
+        iconName: "check",
+        iconColor: "green",
+        syncTime: 3,
+      }),
+    },
+
+    onShelfYesterday: {
+      title: "On Shelf Yesterday",
+      getData: (metrics) => ({
+        count:
+          metrics?.onShelfYesterdayPerc != null
+            ? `${metrics.onShelfYesterdayPerc}%`
+            : null,
+
+        subTitleColor: "red",
+
+        subCount:
+          metrics?.totalOnShelfYesterdayCount != null &&
+          metrics?.totalStockYesterdayCount != null
+            ? `${NumberConversion(metrics.totalOnShelfYesterdayCount)}/${NumberConversion(metrics.totalStockYesterdayCount)}`
+            : null,
+
+        subTitle:
+          metrics?.missingOnShelfYesterdayPercent != null
+            ? `${Math.round(metrics.missingOnShelfYesterdayPercent)}% missing`
+            : null,
+      }),
+    },
+  };
 
   /* ---------------- VERIFY USER ---------------- */
   useEffect(() => {
@@ -65,7 +100,7 @@ const ProductList = ({ navigation }) => {
     }
 
     const fetchData = () => {
-      dispatch(get_categories());
+      dispatch(get_categories({ page: 1 }));
       dispatch(get_activeProducts());
       dispatch(get_osaRequests());
     };
@@ -106,47 +141,43 @@ const ProductList = ({ navigation }) => {
   }, [categories]);
 
   useEffect(() => {
-    if (dashboardMetrics) {
-      const data = cards.map((card) => {
-        if (card.title == "Active Products")
-          return {
-            title: "Active Products",
-            count: dashboardMetrics.activeProducts,
-            iconName: "check",
-            iconColor: "green",
-            syncTime: 3,
-          };
-        if (card.title == "On Shelf Yesterday") {
-          return {
-            title: "On Shelf Yesterday",
-            count: dashboardMetrics.onShelfYesterdayPerc + "%",
-            subTitleColor: "red",
-            subCount: `${NumberConversion(
-              dashboardMetrics.totalOnShelfYesterdayCount,
-            )}/ ${NumberConversion(dashboardMetrics.totalStockYesterdayCount)}`,
-            subTitle: `${Math.round(
-              dashboardMetrics.missingOnShelfYesterdayPercent,
-            )}% missing`,
-          };
-        }
-      });
+    if (!dashboardMetrics) return;
 
-      setCards(data);
-    }
+    const data = Object.values(CARD_CONFIG).map((config) => ({
+      title: config.title,
+      ...config.getData(dashboardMetrics),
+    }));
+
+    setCards(data);
+    setLoadingCards(false);
   }, [dashboardMetrics]);
 
   useEffect(() => {
     if (tempOsaRequests) {
       setOsaRequests(tempOsaRequests);
+      setLoadingOsa(false);
     }
   }, [tempOsaRequests]);
 
   useEffect(() => {
-    if (tempCategories) {
-      setCategories(tempCategories);
-      setLoading(false);
-    }
-  }, [tempCategories]);
+  if (tempCategories) {
+    // setCategories((prev) => {
+    //   // avoid duplicate first page
+    //   if (!prev.length) return tempCategories;
+    //   return [...prev, ...tempCategories];
+    // });
+
+    setCategories(tempCategories)
+    setLoading(false);
+  }
+}, [tempCategories]);
+
+  // useEffect(() => {
+  //   if (tempCategories) {
+  //     setCategories(tempCategories);
+  //     setLoading(false);
+  //   }
+  // }, [tempCategories]);
   useEffect(() => {
     if (tempDashboardMetrics) {
       setDashboardMetrics(tempDashboardMetrics);
@@ -212,44 +243,41 @@ const ProductList = ({ navigation }) => {
     );
   };
 
-  /* ---------------- RENDER PRODUCT ---------------- */
-  const renderProductItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.productCard}
-      onPress={() => navigation.navigate("ProductDetail", { product: item })}
-    >
-      <Image
-        source={{ uri: item.productImage }}
-        style={styles.productImage}
-        resizeMode="cover"
-      />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={2}>
-          {item.productName}
-        </Text>
+  const fetchCategories = useCallback(() => {
+    console.log('category paginnation',categoryPagination);
+    
+  if (!categoryPagination?.hasNextPage) {console.log('returned'); return;}
+  else{
 
-        <View style={{ flexDirection: "row" }}>
-          <Text style={styles.productWeight}>{item.productWeight}</Text>
-          <Text>.</Text>
-          <Text style={styles.productCategory}>{item.categoryName}</Text>
-        </View>
-        <Text style={{}}>SKU: {item.sku}</Text>
-        <View style={styles.bottomRow}>
-          <Text style={styles.productPrice}>
-            {" "}
-            ₹{parseFloat(item.price).toFixed(2)}{" "}
-          </Text>
-          <Text style={styles.productPriceStike}>
-            {" "}
-            ₹{parseFloat(item.price).toFixed(2) + 5}{" "}
-          </Text>
-          <Text style={styles.percentageOff(appColor)}>
-            {item.percentageOff} OFF
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+    
+    dispatch(
+      get_categories({
+        page: categoryPagination.currentPage + 1,
+      })
+    );
+  }
+}, [categoryPagination]);
+
+
+  // const fetchCategories = useCallback(() => {
+
+  //   console.log("🚀 fetchCategories called");
+  //   // if (!authKey) return;
+
+  //   // prevent multiple calls
+  //   // if (loading) return;
+
+  //   // if no pagination info, fallback
+  //   const currentPage = categories?.length
+  //     ? Math.ceil(categories.length / 10)
+  //     : 1;
+
+  //   dispatch(
+  //     get_categories({
+  //       page: currentPage +1,
+  //     }),
+  //   );
+  // }, [authKey, loading, categories]);
 
   /* ===================== UI ===================== */
 
@@ -257,53 +285,57 @@ const ProductList = ({ navigation }) => {
     return (
       <PageBody style={styles.centerContainer}>
         <ActivityIndicator size="large" />
-        <Text style={{color:appColor.text.dark}} >Loading session...</Text>
+        <Text style={{ color: appColor.text.dark }}>Loading session...</Text>
       </PageBody>
     );
   }
   return (
     <PageBody style={[styles.container, { padding: 16 }]}>
       {/* Top Cards */}
+
       <View style={{ flexDirection: "row", gap: 8 }}>
-        {cards.map((item, index) => {
-          return (
-            <Card
-              key={index}
-              title={item.title}
-              count={item.count}
-              syncTime={item.syncTime}
-              iconName={item.iconName}
-              iconColor={item.iconColor}
-              subTitle={item.subTitle}
-              subTitleColor={item.subTitleColor}
-              subCount={item.subCount}
-            />
-          );
-        })}
+        {cards.length > 0 &&
+          cards.map((item, index) => {
+            return (
+              <Card
+                loading={loadingCards}
+                key={index}
+                title={item.title}
+                count={item.count || 0}
+                syncTime={item.syncTime}
+                iconName={item.iconName}
+                iconColor={item.iconColor}
+                subTitle={item.subTitle}
+                subTitleColor={item.subTitleColor}
+                subCount={item.subCount}
+              />
+            );
+          })}
       </View>
+
       <>
-
-
-        {osaRequests && osaRequests.total == 1 ? (
-          <OSARequests
-          title="New OSA Request"
-          request={osaRequests.data[0]}
-          subTitle={`${osaRequests.data[0].products} items to be scanned `}
-          time={timeAgo(osaRequests.data[0].createdAt)}
-          btnText={"Start Scan"}
-         
-          navigation={navigation}
-          />
-        ) : osaRequests.total > 1 ? (
-          <OSARequests
-          title={`${osaRequests.total} New OSA Requests`}
-          time={timeAgo(osaRequests.data[0].createdAt)}
-          btnText={"View"}
-          navigation={navigation}
-           backgroundColor={appColor?.primaryColor?.background}
-          />
-        ) : null}
-
+        <View>
+          {osaRequests && osaRequests.total == 1 ? (
+            <OSARequests
+              loading={loadingOsa}
+              title="New OSA Request"
+              request={osaRequests.data[0]}
+              subTitle={`${osaRequests.data[0].products} items to be scanned `}
+              time={timeAgo(osaRequests.data[0].createdAt)}
+              btnText={"Start Scan"}
+              navigation={navigation}
+            />
+          ) : osaRequests.total > 1 ? (
+            <OSARequests
+              loading={loadingOsa}
+              title={`${osaRequests.total} New OSA Requests`}
+              time={timeAgo(osaRequests.data[0].createdAt)}
+              btnText={"View"}
+              navigation={navigation}
+              backgroundColor={appColor?.primaryColor?.background}
+            />
+          ) : null}
+        </View>
       </>
 
       <StatusBar
@@ -316,15 +348,27 @@ const ProductList = ({ navigation }) => {
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" />
           </View>
-        ) : (
+        ) : categories.length > 0 ? (
           <FlatList
             data={categories}
-            keyExtractor={(item) => item.categoryName}
+            keyExtractor={(item,index) => index.toString()}
             ItemSeparatorComponent={() => {
               return <View style={{ height: 8 }}></View>;
             }}
             renderItem={renderCategoryItem}
             showsVerticalScrollIndicator={false}
+            onEndReachedThreshold={0.3}
+            onEndReached={() => {
+              console.log("🔥 onEndReached triggered");
+
+              if (!onEndReachedCalledDuringMomentum.current) {
+                fetchCategories();
+                onEndReachedCalledDuringMomentum.current = true;
+              }
+            }}
+            onMomentumScrollBegin={() => {
+              onEndReachedCalledDuringMomentum.current = false;
+            }}
             ListHeaderComponent={
               <View
                 style={{
@@ -356,6 +400,12 @@ const ProductList = ({ navigation }) => {
               </View>
             }
           />
+        ) : (
+          <View style={{ flex: 1, alignItems: "center", marginTop: 20 }}>
+            <Text style={{ color: appColor.text.regular }}>
+              No Categories Found
+            </Text>
+          </View>
         )}
       </View>
     </PageBody>
@@ -378,6 +428,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   tableHeader: {
     flexDirection: "row",
     justifyContent: "space-between",

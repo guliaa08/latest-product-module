@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import React from "react";
 import { PageBody } from "../Layout";
 import Icon from "react-native-vector-icons/dist/EvilIcons";
@@ -13,37 +13,48 @@ export default function Card({
   syncTime,
   subTitleColor,
   subCount,
+  loading
 }) {
   const { appColor } = useSelector((state) => state?.productAppTheme);
 
   return (
     <PageBody style={styles.container(appColor)}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Text style={[{ color: appColor.text.light }, styles.title]}>
-          {title}
-        </Text>
-        <Icon size={10} color={iconColor} name={"chevron-right"} />{" "}
-      </View>
-      <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
-        <Text style={[{ color: appColor.text.light }, styles.count]}>
-          {count}
-        </Text>
-        <Text style={{ letterSpacing: -1, color: appColor.text.light }}>
-          {subCount && subCount}
-        </Text>
-      </View>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-        {iconName && <Icon size={10} color={iconColor} name={iconName} />}
-        {syncTime ? (
-          <Text style={[{ color: appColor.text.light }, styles.subTitle]}>
-            Sync {syncTime}h ago
-          </Text>
-        ) : (
-          <Text style={[{ color: subTitleColor }, styles.subTitle]}>
-            {subTitle}
-          </Text>
-        )}
-      </View>
+      {loading ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={[{ color: appColor.text.light }, styles.title]}>
+              {title}
+            </Text>
+            <Icon size={10} color={iconColor} name={"chevron-right"} />{" "}
+          </View>
+          <View
+            style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}
+          >
+            <Text style={[{ color: appColor.text.light }, styles.count]}>
+              { count!=undefined && count}
+            </Text>
+            <Text style={{ letterSpacing: -1, color: appColor.text.light }}>
+              {subCount && subCount}
+            </Text>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            {iconName && <Icon size={10} color={iconColor} name={iconName} />}
+            {syncTime ? (
+              <Text style={[{ color: appColor.text.light }, styles.subTitle]}>
+                Sync {syncTime}h ago
+              </Text>
+            ) : (
+              <Text style={[{ color: subTitleColor }, styles.subTitle]}>
+                {subTitle}
+              </Text>
+            )}
+          </View>
+        </>
+      )}
     </PageBody>
   );
 }
