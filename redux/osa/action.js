@@ -9,7 +9,7 @@ export const get_osaList = createAsyncThunk(
       const data = await api.get(`osa/${_params.request.id}/products`, {
         params: {
           ...params,
-          search: "",
+          // search: "",
           // search: state.productAppOsa.search,
         },
       });

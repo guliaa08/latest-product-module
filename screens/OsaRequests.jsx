@@ -23,25 +23,28 @@ const OSARequests = ({
     }
   };
   return (
+    <Pressable onPress={handlePress}>
+
     <View
       style={[
         styles.banner,
         { backgroundColor: backgroundColor || 'transparent', borderColor: appColor.grey.border },
       ]}
-    >
+      >
       <View style={styles.leftSection}>
         <Text style={styles.title(appColor)}>{title && title}</Text>
         {subTitle && <Text style={styles.subtitle(appColor)}>{subTitle}</Text>}
         <Text style={styles.time}>{time && time}</Text>
       </View>
 
-      <Pressable onPress={handlePress}>
+      <View >
         <Text style={styles.startScanText}>
           {btnText}
           {">"}
         </Text>
-      </Pressable>
+      </View>
     </View>
+      </Pressable>
   );
 };
 
