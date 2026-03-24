@@ -113,7 +113,7 @@ const ProductNavigator = (props) => {
         {(props) => <ProductsScan {...props} />}
       </Stack.Screen>
 
-      <Stack.Screen name="ProductsPerCategory" options={{ headerShown: false }}>
+      <Stack.Screen name="ProductsPerCategory" options={{  headerShown: true , title:"All OSA Requests" }}>
         {(props) => <ProductsPerCategory {...props} />}
       </Stack.Screen>
 

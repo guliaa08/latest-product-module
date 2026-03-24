@@ -69,7 +69,7 @@ export const COLOR_SCHEMES = Object.freeze({
     emptyComponentBackgroundColor: '#FCFCFC',
   },
   [COLOR_SCHEME_DARK]: {
-    icon: '#000000',
+    icon: '#ffffff',   // modified by vipul ( black to white )
     background: '#000000',
 
     text: {

@@ -17,7 +17,7 @@ export default function SearchBox({request}) {
   useEffect(() => {
     
     dispatch(setSearch({ search: text }));
-    dispatch(get_osaList({ request, params: { page: 1 } }));
+    dispatch(get_osaList({ request, params: { page: 1 ,search:debouncedText} })); 
   }, [debouncedText]);
   return (
  
