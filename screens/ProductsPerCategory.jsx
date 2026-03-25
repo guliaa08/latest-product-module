@@ -40,11 +40,10 @@ export default function ProductsPerCategory({ route }) {
   const [checked, setChecked] = useState(false);
   const { isLoadingUser, isValidUser } = useSelector(state => state.productAppUser);
   const [osaRequests, setOsaRequests] = useState({});
-  const navigation = useNavigation();
-  const [cards, setCards] = useState([
-    { title: 'Active Products' },
-    { title: 'On Shelf Yesterday' },
-  ]);
+  const navigation = useNavigation();  
+  const [loadingCards, setLoadingCards] = useState(true);
+  
+  const [cards, setCards] = useState([]);
 
   const isInitialLoading = isLoadingProducts && products.length === 0;
   const isPaginationLoading = isLoadingProducts && products.length > 0;
@@ -63,6 +62,59 @@ export default function ProductsPerCategory({ route }) {
 
   const {appColor:color} = useSelector(state=>state.productAppTheme)
   const dispatch = useDispatch();
+
+
+
+  // top bar card configurations 
+    const CARD_CONFIG = {
+      activeProducts: {
+        title: "Active Products",
+        getData: (metrics) => ({
+          count: metrics?.activeProducts ?? 0,
+          iconName: "check",
+          iconColor: "green",
+          syncTime: timeAgo( metrics?.lastSyncTime),
+        }),
+      },
+  
+      onShelfYesterday: {
+        title: "On Shelf Yesterday",
+        getData: (metrics) => ({
+          count:
+            metrics?.onShelfYesterdayPerc != null
+              ? `${metrics.onShelfYesterdayPerc}%`
+              : null,
+  
+          subTitleColor: "red",
+  
+          subCount:
+            metrics?.totalOnShelfYesterdayCount != null &&
+            metrics?.totalStockYesterdayCount != null
+              ? `${NumberConversion(metrics.totalOnShelfYesterdayCount)}/${NumberConversion(metrics.totalStockYesterdayCount)}`
+              : null,
+  
+          subTitle:
+            metrics?.missingOnShelfYesterdayPercent != null
+              ? `${metrics.missingOnShelfYesterdayPercent}% missing`
+              : null,
+        }),
+      },
+    };
+    
+      useEffect(() => {
+        if (!dashboardMetrics) return;
+        console.log('dashboard matrics', dashboardMetrics);
+        
+    
+        const data = Object.values(CARD_CONFIG).map((config) => ({
+          title: config.title,
+          ...config.getData(dashboardMetrics),
+        }));
+    
+        setCards(data);
+        setLoadingCards(false);
+      }, [dashboardMetrics]);
+    
 
   /* ---------------- GET PRODUCTS ---------------- */
   useEffect(() => {
@@ -107,41 +159,7 @@ export default function ProductsPerCategory({ route }) {
   //   }
   // }, [list]);
 
-  useEffect(() => {
-    if (dashboardMetrics) {
-      console.log('tempDashboardMetrics', tempDashboardMetrics);
-
-      const data = cards.map(card => {
-        if (card.title == 'Active Products')
-          return {
-            title: 'Active Products',
-            count: dashboardMetrics.activeProducts,
-            iconName: 'check',
-            iconColor: "green",
-            syncTime: 3,
-          };
-        if (card.title == 'On Shelf Yesterday') {
-          return {
-            title: 'On Shelf Yesterday',
-            count: dashboardMetrics.onShelfYesterdayPerc + "%",
-            subTitleColor: "red",
-            subCount: `${NumberConversion(
-              dashboardMetrics.totalOnShelfYesterdayCount,
-            )}/ ${NumberConversion(
-              dashboardMetrics.totalStockYesterdayCount,
-            )}`,
-            subTitle: `${Math.round(
-              dashboardMetrics.missingOnShelfYesterdayPercent,
-            )}% missing`
-
-          };
-        }
-      });
-
-      setCards(data)
-
-    }
-  }, [dashboardMetrics]);
+ 
 
   const renderProductItem = ({ item }) => (
     <TouchableOpacity
@@ -199,13 +217,32 @@ export default function ProductsPerCategory({ route }) {
 
       <PageBody style={styles.container}>
 
+<View style={{ flexDirection: "row", gap: 8 }}>
+        {cards.length > 0 &&
+          cards.map((item, index) => {
+            return (
+              <Card
+                loading={loadingCards}
+                key={index}
+                title={item.title}
+                count={item.count || 0}
+                syncTime={item.syncTime}
+                iconName={item.iconName}
+                iconColor={item.iconColor}
+                subTitle={item.subTitle}
+                subTitleColor={item.subTitleColor}
+                subCount={item.subCount}
+              />
+            );
+          })}
+      </View>
         {/* Top Cards */}
-        <View style={{ flexDirection: 'row', gap: gap }}>
+        {/* <View style={{ flexDirection: 'row', gap: gap }}>
 
           {cards.map((item, index) => {
             console.log(item.iconColor)
             return <Card title={item.title} count={item.count} syncTime={item.syncTime} iconName={item.iconName} iconColor={item.iconColor} subTitle={item.subTitle} subTitleColor={item.subTitleColor} subCount={item.subCount} />;
-          })}
+          })} */}
 
           {/* <View style={{ width: screenWidth / 2,height:98 }}>
             {dashboardMetrics && (
@@ -235,7 +272,7 @@ export default function ProductsPerCategory({ route }) {
               />
             )}
           </View> */}
-        </View>
+        {/* </View> */}
 
         <View style={{}}>
 

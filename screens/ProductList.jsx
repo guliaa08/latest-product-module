@@ -1,5 +1,5 @@
 import { timeAgo } from "../helper/time_ago/TimeAgo";
-import { useState, useEffect, act, useRef } from "react";
+import React, { useState, useEffect, act, useRef, useCallback } from "react";
 import { NumberConversion } from "../helper/number_converter/NumberConverter";
 import {
   View,
@@ -40,18 +40,58 @@ const ProductList = ({ navigation }) => {
   const [dashboardMetrics, setDashboardMetrics] = useState(null);
   const [viewMode, setViewMode] = useState("categories"); // 👈 NEW
   const [loading, setLoading] = useState(true);
+  const [loadingOsa, setLoadingOsa] = useState(true);
+  const [loadingCards, setLoadingCards] = useState(true);
   const [error, setError] = useState(null);
-  const [cards, setCards] = useState([
-    { title: "Active Products" },
-    { title: "On Shelf Yesterday" },
-  ]);
+  const [cards, setCards] = useState([]);
+  const onEndReachedCalledDuringMomentum = React.useRef(false);
 
   const {
     products: list,
     categories: tempCategories,
     dashboardMetrics: tempDashboardMetrics,
     osaRequests: tempOsaRequests,
+    categoryPagination,
+    isLoadingCategories, error:tempError
   } = useSelector((state) => state.productAppProduct);
+
+
+  
+
+  const CARD_CONFIG = {
+    activeProducts: {
+      title: "Active Products",
+      getData: (metrics) => ({
+        count: metrics?.activeProducts ?? 0,
+        iconName: "check",
+        iconColor: "green",
+        syncTime: timeAgo( metrics?.lastSyncTime),
+      }),
+    },
+
+    onShelfYesterday: {
+      title: "On Shelf Yesterday",
+      getData: (metrics) => ({
+        count:
+          metrics?.onShelfYesterdayPerc != null
+            ? `${metrics.onShelfYesterdayPerc}%`
+            : null,
+
+        subTitleColor: "red",
+
+        subCount:
+          metrics?.totalOnShelfYesterdayCount != null &&
+          metrics?.totalStockYesterdayCount != null
+            ? `${NumberConversion(metrics.totalOnShelfYesterdayCount)}/${NumberConversion(metrics.totalStockYesterdayCount)}`
+            : null,
+
+        subTitle:
+          metrics?.missingOnShelfYesterdayPercent != null
+            ? `${metrics.missingOnShelfYesterdayPercent}% missing`
+            : null,
+      }),
+    },
+  };
 
   /* ---------------- VERIFY USER ---------------- */
   useEffect(() => {
@@ -65,7 +105,7 @@ const ProductList = ({ navigation }) => {
     }
 
     const fetchData = () => {
-      dispatch(get_categories());
+      dispatch(get_categories({ page: 1 }));
       dispatch(get_activeProducts());
       dispatch(get_osaRequests());
     };
@@ -81,6 +121,7 @@ const ProductList = ({ navigation }) => {
         if (retryCount.current >= 5) {
           clearInterval(retryInterval.current);
           retryInterval.current = null;
+          setError(true)
           return;
         }
 
@@ -106,38 +147,23 @@ const ProductList = ({ navigation }) => {
   }, [categories]);
 
   useEffect(() => {
-    if (dashboardMetrics) {
-      const data = cards.map((card) => {
-        if (card.title == "Active Products")
-          return {
-            title: "Active Products",
-            count: dashboardMetrics.activeProducts,
-            iconName: "check",
-            iconColor: "green",
-            syncTime: 3,
-          };
-        if (card.title == "On Shelf Yesterday") {
-          return {
-            title: "On Shelf Yesterday",
-            count: dashboardMetrics.onShelfYesterdayPerc + "%",
-            subTitleColor: "red",
-            subCount: `${NumberConversion(
-              dashboardMetrics.totalOnShelfYesterdayCount,
-            )}/ ${NumberConversion(dashboardMetrics.totalStockYesterdayCount)}`,
-            subTitle: `${Math.round(
-              dashboardMetrics.missingOnShelfYesterdayPercent,
-            )}% missing`,
-          };
-        }
-      });
+    if (!dashboardMetrics) return;
+    console.log('dashboard matrics', dashboardMetrics);
+    
 
-      setCards(data);
-    }
+    const data = Object.values(CARD_CONFIG).map((config) => ({
+      title: config.title,
+      ...config.getData(dashboardMetrics),
+    }));
+
+    setCards(data);
+    setLoadingCards(false);
   }, [dashboardMetrics]);
 
   useEffect(() => {
     if (tempOsaRequests) {
       setOsaRequests(tempOsaRequests);
+      setLoadingOsa(false);
     }
   }, [tempOsaRequests]);
 
@@ -147,6 +173,7 @@ const ProductList = ({ navigation }) => {
       setLoading(false);
     }
   }, [tempCategories]);
+
   useEffect(() => {
     if (tempDashboardMetrics) {
       setDashboardMetrics(tempDashboardMetrics);
@@ -190,66 +217,84 @@ const ProductList = ({ navigation }) => {
         : 0;
 
     return (
-      <TouchableOpacity
-        style={[styles.card, { borderColor: appColor.grey.border }]}
-        onPress={() => handleCategoryPress(item.categoryName)}
-      >
-        <View style={styles.rowBetween}>
-          <Text style={[styles.categoryTitle, { color: appColor.text.dark }]}>
-            {item.categoryName}
-          </Text>
+     <TouchableOpacity style={[styles.card, { borderColor: appColor.grey.border }]} onPress={() => handleCategoryPress(item.categoryName)}>
+  
+  {/* LEFT */}
+  <View style={{ flex: 1 }}>
+    <Text style={[styles.categoryTitle, { color: appColor.text.dark }]}>
+      {item.categoryName}
+    </Text>
+  </View>
 
-          <View style={{ alignItems: "flex-end" }}>
-            <Text style={[styles.stockText, { color: appColor.text.light }]}>
-              {item.totalOsa}/{item.totalStock}
-            </Text>
-            <Text style={styles.percentageText}>
-              {item.osaPercent}% on shelf
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
+  {/* CENTER */}
+ <View
+  style={{
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  }}
+>
+  {/* ✅ First 3 images */}
+  { item.images && item?.images?.slice(0, 3).map((img, index) => (
+    <Image
+      key={index}
+      style={{
+        height: 30,
+        width: 30,
+        borderRadius: 30,
+        borderWidth: 1,
+        borderColor: appColor.grey.border,
+        marginLeft: index === 0 ? 0 : -10, // overlap
+      }}
+      source={{ uri: img }}
+    />
+  ))}
+
+  {/* ✅ 4th overlay circle */}
+  { item.images && item?.images?.length > 3 && (
+    <View
+      style={{
+        height: 30,
+        width: 30,
+        borderRadius: 30,
+        backgroundColor: appColor.text.regular,
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: -10, // overlap with 3rd
+      }}
+    >
+      <Text style={{ color: "#fff", fontSize: 10 }}>
+        +{item.images.length - 3}
+      </Text>
+    </View>
+  )}
+</View> 
+
+  {/* RIGHT */}
+  <View style={{ flex: 1, alignItems: "flex-end" }}>
+    <Text style={[styles.stockText, { color: appColor.text.light }]}>
+      {item.totalOsa}/{item.totalStock}
+    </Text>
+    <Text style={styles.percentageText}>
+      {item.osaPercent}% on shelf
+    </Text>
+  </View>
+
+</TouchableOpacity>
     );
   };
 
-  /* ---------------- RENDER PRODUCT ---------------- */
-  const renderProductItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.productCard}
-      onPress={() => navigation.navigate("ProductDetail", { product: item })}
-    >
-      <Image
-        source={{ uri: item.productImage }}
-        style={styles.productImage}
-        resizeMode="cover"
-      />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={2}>
-          {item.productName}
-        </Text>
-
-        <View style={{ flexDirection: "row" }}>
-          <Text style={styles.productWeight}>{item.productWeight}</Text>
-          <Text>.</Text>
-          <Text style={styles.productCategory}>{item.categoryName}</Text>
-        </View>
-        <Text style={{}}>SKU: {item.sku}</Text>
-        <View style={styles.bottomRow}>
-          <Text style={styles.productPrice}>
-            {" "}
-            ₹{parseFloat(item.price).toFixed(2)}{" "}
-          </Text>
-          <Text style={styles.productPriceStike}>
-            {" "}
-            ₹{parseFloat(item.price).toFixed(2) + 5}{" "}
-          </Text>
-          <Text style={styles.percentageOff(appColor)}>
-            {item.percentageOff} OFF
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+  const fetchCategories = useCallback(() => {
+    if (!categoryPagination?.hasNextPage) return;
+    else {
+      dispatch(
+        get_categories({
+          page: categoryPagination.currentPage + 1,
+        }),
+      );
+    }
+  }, [categoryPagination]);
 
   /* ===================== UI ===================== */
 
@@ -257,53 +302,57 @@ const ProductList = ({ navigation }) => {
     return (
       <PageBody style={styles.centerContainer}>
         <ActivityIndicator size="large" />
-        <Text style={{color:appColor.text.dark}} >Loading session...</Text>
+        <Text style={{ color: appColor.text.dark }}>Loading session...</Text>
       </PageBody>
     );
   }
   return (
     <PageBody style={[styles.container, { padding: 16 }]}>
       {/* Top Cards */}
+
       <View style={{ flexDirection: "row", gap: 8 }}>
-        {cards.map((item, index) => {
-          return (
-            <Card
-              key={index}
-              title={item.title}
-              count={item.count}
-              syncTime={item.syncTime}
-              iconName={item.iconName}
-              iconColor={item.iconColor}
-              subTitle={item.subTitle}
-              subTitleColor={item.subTitleColor}
-              subCount={item.subCount}
-            />
-          );
-        })}
+        {cards.length > 0 &&
+          cards.map((item, index) => {
+            return (
+              <Card
+                loading={loadingCards}
+                key={index}
+                title={item.title}
+                count={item.count || 0}
+                syncTime={item.syncTime}
+                iconName={item.iconName}
+                iconColor={item.iconColor}
+                subTitle={item.subTitle}
+                subTitleColor={item.subTitleColor}
+                subCount={item.subCount}
+              />
+            );
+          })}
       </View>
+
       <>
-
-
-        {osaRequests && osaRequests.total == 1 ? (
-          <OSARequests
-          title="New OSA Request"
-          request={osaRequests.data[0]}
-          subTitle={`${osaRequests.data[0].products} items to be scanned `}
-          time={timeAgo(osaRequests.data[0].createdAt)}
-          btnText={"Start Scan"}
-         
-          navigation={navigation}
-          />
-        ) : osaRequests.total > 1 ? (
-          <OSARequests
-          title={`${osaRequests.total} New OSA Requests`}
-          time={timeAgo(osaRequests.data[0].createdAt)}
-          btnText={"View"}
-          navigation={navigation}
-           backgroundColor={appColor?.primaryColor?.background}
-          />
-        ) : null}
-
+        <View>
+          {osaRequests && osaRequests.total == 1 ? (
+            <OSARequests
+              loading={loadingOsa}
+              title="New OSA Request"
+              request={osaRequests.data[0]}
+              subTitle={`${osaRequests.data[0].products} items to be scanned `}
+              time={timeAgo(osaRequests.data[0].createdAt)}
+              btnText={"Start Scan"}
+              navigation={navigation}
+            />
+          ) : osaRequests.total > 1 ? (
+            <OSARequests
+              loading={loadingOsa}
+              title={`${osaRequests.total} New OSA Requests`}
+              time={timeAgo(osaRequests.data[0].createdAt)}
+              btnText={"View"}
+              navigation={navigation}
+              backgroundColor={appColor?.primaryColor?.background}
+            />
+          ) : null}
+        </View>
       </>
 
       <StatusBar
@@ -312,19 +361,33 @@ const ProductList = ({ navigation }) => {
       />
 
       <View style={{ flex: 1 }}>
-        {loading ? (
+        { !authKey || loading  ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" />
           </View>
-        ) : (
+        ) : categories.length ===0 ? (
+            <View style={styles.centerContainer}>
+        <Text style={{color:appColor.text.regular}}>No categories found</Text>
+      </View>
+        ) :categories.length > 0 ? (
           <FlatList
             data={categories}
-            keyExtractor={(item) => item.categoryName}
+            keyExtractor={(item, index) => index.toString()}
             ItemSeparatorComponent={() => {
               return <View style={{ height: 8 }}></View>;
             }}
             renderItem={renderCategoryItem}
             showsVerticalScrollIndicator={false}
+            onEndReachedThreshold={0.3}
+            onEndReached={() => {
+              if (!onEndReachedCalledDuringMomentum.current) {
+                fetchCategories();
+                onEndReachedCalledDuringMomentum.current = true;
+              }
+            }}
+            onMomentumScrollBegin={() => {
+              onEndReachedCalledDuringMomentum.current = false;
+            }}
             ListHeaderComponent={
               <View
                 style={{
@@ -356,6 +419,13 @@ const ProductList = ({ navigation }) => {
               </View>
             }
           />
+        ) : (
+         // boilderplate code.
+          <View style={{ flex: 1, alignItems: "center", marginTop: 20 }}>
+            <Text style={{ color: appColor.text.regular }}> 
+              {error && "something went wrong, contact support" ||"No Categories Found"}. 
+            </Text>
+          </View>
         )}
       </View>
     </PageBody>
@@ -378,6 +448,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   tableHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -393,6 +464,9 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     borderWidth: 1,
+    flexDirection:"row",
+    justifyContent:"center",
+    alignItems:'center'
   },
   rowBetween: {
     flexDirection: "row",

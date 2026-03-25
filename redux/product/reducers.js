@@ -10,6 +10,15 @@ const initialState = {
   dashboardMetrics: [],
   osaRequests: [],
   isLoadingProducts: false,
+  isLoadingCategories: false,
+  categoryPagination: {
+    currentPage: 1,
+    totalPages: 1,
+    hasNextPage: true,
+    totalCount: 0,
+    limit: 10,
+  },
+  error: null,
 };
 
 const productAppProductSlice = createSlice({
@@ -44,16 +53,39 @@ console.log('page no: ',pagination.currentPage, "data: ", data);
     });
 
     // for categories
-    builder.addCase(get_categories.pending, (state) => {
-      state.isLoadingCategories = true;
-    });
-    builder.addCase(get_categories.fulfilled, (state, action) => {
-      state.isLoadingCategories = false;
-      state.categories = action.payload.data;
-    });
-    builder.addCase(get_categories.rejected, (state) => {
-      state.isLoadingCategories = false;
-    });
+   builder.addCase(get_categories.pending, (state) => {
+  state.isLoadingCategories = true;
+   
+});
+
+builder.addCase(get_categories.fulfilled, (state, action) => {
+  state.isLoadingCategories = false;
+
+  const { data = [], pagination = {} } = action.payload || {};
+  const currentPage = pagination?.currentPage ;
+
+  
+
+  if (currentPage === 1) {
+    state.categories = data;
+  }  else {
+  
+    state.categories = [...state.categories ||[], ...data]
+   
+  }
+  state.categoryPagination = {
+    currentPage: pagination.currentPage,
+    totalPages: pagination.totalPages,
+    hasNextPage: pagination.hasNextPage,
+    totalCount: pagination.totalCount,
+    limit: pagination.limit,
+  };
+});
+
+builder.addCase(get_categories.rejected, (state, action) => {
+  state.isLoadingCategories = false;
+  state.error = action?.error?.message || "Failed to fetch categories";
+});
     // for active Products
     builder.addCase(get_activeProducts.pending, (state) => {
       state.isLoadingCategories = true;
