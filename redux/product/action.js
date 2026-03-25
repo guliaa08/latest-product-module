@@ -28,19 +28,12 @@ export const get_categories = createAsyncThunk(
   "get_categories",
   async (_params, thunkApi) => {
    
-      console.log("params",_params.page);
-      
-
     try {
       const data = await api.get("category/",{
         params:{limit:10,page:_params.page}
       });
-      console.log('data',data);
-      
       return data;
     } catch (error) {
-      console.log('error',error);
-      
       return thunkApi.rejectWithValue(error);
     }
   },

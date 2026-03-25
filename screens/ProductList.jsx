@@ -50,7 +50,9 @@ const ProductList = ({ navigation }) => {
     products: list,
     categories: tempCategories,
     dashboardMetrics: tempDashboardMetrics,
-    osaRequests: tempOsaRequests, categoryPagination, isLoadingCategories 
+    osaRequests: tempOsaRequests,
+    categoryPagination,
+    isLoadingCategories,
   } = useSelector((state) => state.productAppProduct);
 
   const CARD_CONFIG = {
@@ -160,17 +162,17 @@ const ProductList = ({ navigation }) => {
   }, [tempOsaRequests]);
 
   useEffect(() => {
-  if (tempCategories) {
-    // setCategories((prev) => {
-    //   // avoid duplicate first page
-    //   if (!prev.length) return tempCategories;
-    //   return [...prev, ...tempCategories];
-    // });
+    if (tempCategories) {
+      // setCategories((prev) => {
+      //   // avoid duplicate first page
+      //   if (!prev.length) return tempCategories;
+      //   return [...prev, ...tempCategories];
+      // });
 
-    setCategories(tempCategories)
-    setLoading(false);
-  }
-}, [tempCategories]);
+      setCategories(tempCategories);
+      setLoading(false);
+    }
+  }, [tempCategories]);
 
   // useEffect(() => {
   //   if (tempCategories) {
@@ -244,40 +246,15 @@ const ProductList = ({ navigation }) => {
   };
 
   const fetchCategories = useCallback(() => {
-    console.log('category paginnation',categoryPagination);
-    
-  if (!categoryPagination?.hasNextPage) {console.log('returned'); return;}
-  else{
-
-    
-    dispatch(
-      get_categories({
-        page: categoryPagination.currentPage + 1,
-      })
-    );
-  }
-}, [categoryPagination]);
-
-
-  // const fetchCategories = useCallback(() => {
-
-  //   console.log("🚀 fetchCategories called");
-  //   // if (!authKey) return;
-
-  //   // prevent multiple calls
-  //   // if (loading) return;
-
-  //   // if no pagination info, fallback
-  //   const currentPage = categories?.length
-  //     ? Math.ceil(categories.length / 10)
-  //     : 1;
-
-  //   dispatch(
-  //     get_categories({
-  //       page: currentPage +1,
-  //     }),
-  //   );
-  // }, [authKey, loading, categories]);
+    if (!categoryPagination?.hasNextPage) return;
+    else {
+      dispatch(
+        get_categories({
+          page: categoryPagination.currentPage + 1,
+        }),
+      );
+    }
+  }, [categoryPagination]);
 
   /* ===================== UI ===================== */
 
@@ -351,7 +328,7 @@ const ProductList = ({ navigation }) => {
         ) : categories.length > 0 ? (
           <FlatList
             data={categories}
-            keyExtractor={(item,index) => index.toString()}
+            keyExtractor={(item, index) => index.toString()}
             ItemSeparatorComponent={() => {
               return <View style={{ height: 8 }}></View>;
             }}
@@ -359,8 +336,6 @@ const ProductList = ({ navigation }) => {
             showsVerticalScrollIndicator={false}
             onEndReachedThreshold={0.3}
             onEndReached={() => {
-              console.log("🔥 onEndReached triggered");
-
               if (!onEndReachedCalledDuringMomentum.current) {
                 fetchCategories();
                 onEndReachedCalledDuringMomentum.current = true;

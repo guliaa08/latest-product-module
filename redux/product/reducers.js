@@ -62,16 +62,15 @@ builder.addCase(get_categories.fulfilled, (state, action) => {
 
   const { data = [], pagination = {} } = action.payload || {};
   const currentPage = pagination?.currentPage ;
-  console.log('data',data);
-  console.log(pagination,'ther pagination we get')
+
   
 
   if (currentPage === 1) {
     state.categories = data;
   }  else {
-    console.log('STATE.CATE4GORY', state.categories,data,);
-    state.categories = state.categories?.concat(data);
-    console.log(state.categories,'ther finlal categories')
+  
+    state.categories = [...state.categories ||[], ...data]
+   
   }
   state.categoryPagination = {
     currentPage: pagination.currentPage,

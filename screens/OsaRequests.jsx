@@ -1,4 +1,10 @@
-import { View, Text, StyleSheet, Pressable, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 
@@ -8,11 +14,10 @@ const OSARequests = ({
   time,
   btnText,
   request,
-  backgroundColor,loading
+  backgroundColor,
+  loading,
   // navigation,
 }) => {
-  console.log("backgroiund color", backgroundColor);
-
   const navigation = useNavigation();
   const { appColor } = useSelector((state) => state?.productAppTheme);
   const handlePress = () => {
@@ -100,7 +105,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  centerContainer:{
-    flex:1,justifyContent:"center",alignItems:"center"
-  }
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
