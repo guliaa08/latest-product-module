@@ -39,8 +39,6 @@ export const get_categories = createAsyncThunk(
       
       return data;
     } catch (error) {
-      console.log('error',error);
-      
       return thunkApi.rejectWithValue(error);
     }
   },
