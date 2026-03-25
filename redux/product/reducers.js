@@ -55,6 +55,7 @@ console.log('page no: ',pagination.currentPage, "data: ", data);
     // for categories
    builder.addCase(get_categories.pending, (state) => {
   state.isLoadingCategories = true;
+   
 });
 
 builder.addCase(get_categories.fulfilled, (state, action) => {

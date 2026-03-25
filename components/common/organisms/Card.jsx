@@ -45,7 +45,7 @@ export default function Card({
             {iconName && <Icon size={10} color={iconColor} name={iconName} />}
             {syncTime ? (
               <Text style={[{ color: appColor.text.light }, styles.subTitle]}>
-                Sync {syncTime}h ago
+                Sync {syncTime}
               </Text>
             ) : (
               <Text style={[{ color: subTitleColor }, styles.subTitle]}>

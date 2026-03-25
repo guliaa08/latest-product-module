@@ -52,8 +52,11 @@ const ProductList = ({ navigation }) => {
     dashboardMetrics: tempDashboardMetrics,
     osaRequests: tempOsaRequests,
     categoryPagination,
-    isLoadingCategories,
+    isLoadingCategories, error:tempError
   } = useSelector((state) => state.productAppProduct);
+
+
+  
 
   const CARD_CONFIG = {
     activeProducts: {
@@ -62,7 +65,7 @@ const ProductList = ({ navigation }) => {
         count: metrics?.activeProducts ?? 0,
         iconName: "check",
         iconColor: "green",
-        syncTime: 3,
+        syncTime: timeAgo( metrics?.lastSyncTime),
       }),
     },
 
@@ -84,7 +87,7 @@ const ProductList = ({ navigation }) => {
 
         subTitle:
           metrics?.missingOnShelfYesterdayPercent != null
-            ? `${Math.round(metrics.missingOnShelfYesterdayPercent)}% missing`
+            ? `${metrics.missingOnShelfYesterdayPercent}% missing`
             : null,
       }),
     },
@@ -118,6 +121,7 @@ const ProductList = ({ navigation }) => {
         if (retryCount.current >= 5) {
           clearInterval(retryInterval.current);
           retryInterval.current = null;
+          setError(true)
           return;
         }
 
@@ -144,6 +148,8 @@ const ProductList = ({ navigation }) => {
 
   useEffect(() => {
     if (!dashboardMetrics) return;
+    console.log('dashboard matrics', dashboardMetrics);
+    
 
     const data = Object.values(CARD_CONFIG).map((config) => ({
       title: config.title,
@@ -163,23 +169,11 @@ const ProductList = ({ navigation }) => {
 
   useEffect(() => {
     if (tempCategories) {
-      // setCategories((prev) => {
-      //   // avoid duplicate first page
-      //   if (!prev.length) return tempCategories;
-      //   return [...prev, ...tempCategories];
-      // });
-
       setCategories(tempCategories);
       setLoading(false);
     }
   }, [tempCategories]);
 
-  // useEffect(() => {
-  //   if (tempCategories) {
-  //     setCategories(tempCategories);
-  //     setLoading(false);
-  //   }
-  // }, [tempCategories]);
   useEffect(() => {
     if (tempDashboardMetrics) {
       setDashboardMetrics(tempDashboardMetrics);
@@ -223,25 +217,71 @@ const ProductList = ({ navigation }) => {
         : 0;
 
     return (
-      <TouchableOpacity
-        style={[styles.card, { borderColor: appColor.grey.border }]}
-        onPress={() => handleCategoryPress(item.categoryName)}
-      >
-        <View style={styles.rowBetween}>
-          <Text style={[styles.categoryTitle, { color: appColor.text.dark }]}>
-            {item.categoryName}
-          </Text>
+     <TouchableOpacity style={[styles.card, { borderColor: appColor.grey.border }]} onPress={() => handleCategoryPress(item.categoryName)}>
+  
+  {/* LEFT */}
+  <View style={{ flex: 1 }}>
+    <Text style={[styles.categoryTitle, { color: appColor.text.dark }]}>
+      {item.categoryName}
+    </Text>
+  </View>
 
-          <View style={{ alignItems: "flex-end" }}>
-            <Text style={[styles.stockText, { color: appColor.text.light }]}>
-              {item.totalOsa}/{item.totalStock}
-            </Text>
-            <Text style={styles.percentageText}>
-              {item.osaPercent}% on shelf
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
+  {/* CENTER */}
+ <View
+  style={{
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  }}
+>
+  {/* ✅ First 3 images */}
+  { item.images && item?.images?.slice(0, 3).map((img, index) => (
+    <Image
+      key={index}
+      style={{
+        height: 30,
+        width: 30,
+        borderRadius: 30,
+        borderWidth: 1,
+        borderColor: appColor.grey.border,
+        marginLeft: index === 0 ? 0 : -10, // overlap
+      }}
+      source={{ uri: img }}
+    />
+  ))}
+
+  {/* ✅ 4th overlay circle */}
+  { item.images && item?.images?.length > 3 && (
+    <View
+      style={{
+        height: 30,
+        width: 30,
+        borderRadius: 30,
+        backgroundColor: appColor.text.regular,
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: -10, // overlap with 3rd
+      }}
+    >
+      <Text style={{ color: "#fff", fontSize: 10 }}>
+        +{item.images.length - 3}
+      </Text>
+    </View>
+  )}
+</View> 
+
+  {/* RIGHT */}
+  <View style={{ flex: 1, alignItems: "flex-end" }}>
+    <Text style={[styles.stockText, { color: appColor.text.light }]}>
+      {item.totalOsa}/{item.totalStock}
+    </Text>
+    <Text style={styles.percentageText}>
+      {item.osaPercent}% on shelf
+    </Text>
+  </View>
+
+</TouchableOpacity>
     );
   };
 
@@ -321,11 +361,15 @@ const ProductList = ({ navigation }) => {
       />
 
       <View style={{ flex: 1 }}>
-        {loading ? (
+        { !authKey || loading  ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" />
           </View>
-        ) : categories.length > 0 ? (
+        ) : categories.length ===0 ? (
+            <View style={styles.centerContainer}>
+        <Text style={{color:appColor.text.regular}}>No categories found</Text>
+      </View>
+        ) :categories.length > 0 ? (
           <FlatList
             data={categories}
             keyExtractor={(item, index) => index.toString()}
@@ -376,9 +420,10 @@ const ProductList = ({ navigation }) => {
             }
           />
         ) : (
+         // boilderplate code.
           <View style={{ flex: 1, alignItems: "center", marginTop: 20 }}>
-            <Text style={{ color: appColor.text.regular }}>
-              No Categories Found
+            <Text style={{ color: appColor.text.regular }}> 
+              {error && "something went wrong, contact support" ||"No Categories Found"}. 
             </Text>
           </View>
         )}
@@ -419,6 +464,9 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     borderWidth: 1,
+    flexDirection:"row",
+    justifyContent:"center",
+    alignItems:'center'
   },
   rowBetween: {
     flexDirection: "row",
