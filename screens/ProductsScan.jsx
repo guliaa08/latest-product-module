@@ -77,6 +77,7 @@ export default function ProductsScan({ route }) {
     isLoadingPending,
     isLoadingScanned,
     submitted,
+    osaError,
   } = useSelector((state) => state.productAppOsa);
 
   // useEffect(() => {
@@ -289,7 +290,7 @@ export default function ProductsScan({ route }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <PageBody  style={{paddingHorizontal:0}}>
+      <PageBody style={{ paddingHorizontal: 0 }}>
         <View style={styles.container}>
           <View style={{ height: 120 }}>
             <Header
@@ -316,27 +317,41 @@ export default function ProductsScan({ route }) {
                 </Text>
                 {isLoadingPending ? (
                   <Loader />
+                ) : osaRequests?.data?.length === 0 ? (
+                  <Text
+                    style={{ color: color.text.regular, textAlign: "center" }}
+                  >
+                    No products in Pending{" "}
+                  </Text>
+                ) : osaError ? (
+                  <Text
+                    style={{ color: color.text.regular, textAlign: "center" }}
+                  >
+                    Failed to Fetch the Products.
+                  </Text>
                 ) : (
-                  <FlatList
-                    style={[
-                      { flex: 1, marginBottom: filter == "pending" ? 64 : 0 },
-                    ]}
-                    data={osaRequests.data || []}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => renderItems(item)}
-                    ItemSeparatorComponent={() => (
-                      <View style={{ height: 8 }} />
-                    )}
-                    onEndReached={() => loadMorePending()}
-                    onEndReachedThreshold={0.5}
-                    ListFooterComponent={
-                      isLoadingOsa ? (
-                        <View style={{ padding: 16, alignItems: "center" }}>
-                          <Text>Loading more items...</Text>
-                        </View>
-                      ) : null
-                    }
-                  />
+                  osaRequests?.data?.length > 0 && (
+                    <FlatList
+                      style={[
+                        { flex: 1, marginBottom: filter == "pending" ? 64 : 0 },
+                      ]}
+                      data={osaRequests.data || []}
+                      keyExtractor={(item, index) => index.toString()}
+                      renderItem={({ item }) => renderItems(item)}
+                      ItemSeparatorComponent={() => (
+                        <View style={{ height: 8 }} />
+                      )}
+                      onEndReached={() => loadMorePending()}
+                      onEndReachedThreshold={0.5}
+                      ListFooterComponent={
+                        isLoadingOsa && (
+                          <View style={{ padding: 16, alignItems: "center" }}>
+                            <Text>Loading more items...</Text>
+                          </View>
+                        )
+                      }
+                    />
+                  )
                 )}
               </View>
             )}
@@ -356,27 +371,41 @@ export default function ProductsScan({ route }) {
                 </Text>
                 {isLoadingScanned ? (
                   <Loader />
+                ) : osaScanned?.data?.length === 0 ? (
+                  <Text
+                    style={{ color: color.text.regular, textAlign: "center" }}
+                  >
+                    No Scanned Products
+                  </Text>
+                ) : osaError ? (
+                  <Text
+                    style={{ color: color.text.regular, textAlign: "center" }}
+                  >
+                    Failed to Fetch the Products.
+                  </Text>
                 ) : (
-                  <FlatList
-                    style={[{ flex: 1, marginBottom: 64 }]}
-                    data={osaScanned.data}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => {
-                      return renderItems(item);
-                    }}
-                    ItemSeparatorComponent={() => (
-                      <View style={{ height: 8 }} />
-                    )}
-                    onEndReached={() => loadMoreScanned()}
-                    onEndReachedThreshold={0.5}
-                    ListFooterComponent={
-                      isLoadingOsa ? (
-                        <View style={{ padding: 16, alignItems: "center" }}>
-                          <Text>Loading more items...</Text>
-                        </View>
-                      ) : null
-                    }
-                  />
+                  osaScanned?.data?.length > 0 && (
+                    <FlatList
+                      style={[{ flex: 1, marginBottom: 64 }]}
+                      data={osaScanned.data}
+                      keyExtractor={(item, index) => index.toString()}
+                      renderItem={({ item }) => {
+                        return renderItems(item);
+                      }}
+                      ItemSeparatorComponent={() => (
+                        <View style={{ height: 8 }} />
+                      )}
+                      onEndReached={() => loadMoreScanned()}
+                      onEndReachedThreshold={0.5}
+                      ListFooterComponent={
+                        isLoadingOsa && (
+                          <View style={{ padding: 16, alignItems: "center" }}>
+                            <Text>Loading more items...</Text>
+                          </View>
+                        ) 
+                      }
+                    />
+                  )
                 )}
               </View>
             )}
@@ -431,17 +460,12 @@ export default function ProductsScan({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
-   
   },
 
   SubmitOsa: {
- 
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-  
-     
   },
 });

@@ -42,7 +42,7 @@ const ProductList = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [loadingOsa, setLoadingOsa] = useState(true);
   const [loadingCards, setLoadingCards] = useState(true);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
   const [cards, setCards] = useState([]);
   const onEndReachedCalledDuringMomentum = React.useRef(false);
 
@@ -52,7 +52,7 @@ const ProductList = ({ navigation }) => {
     dashboardMetrics: tempDashboardMetrics,
     osaRequests: tempOsaRequests,
     categoryPagination,
-    isLoadingCategories, error:tempError
+    isLoadingCategories, error
   } = useSelector((state) => state.productAppProduct);
 
 
@@ -121,7 +121,7 @@ const ProductList = ({ navigation }) => {
         if (retryCount.current >= 5) {
           clearInterval(retryInterval.current);
           retryInterval.current = null;
-          setError(true)
+          // setError(true)
           return;
         }
 
@@ -170,7 +170,7 @@ const ProductList = ({ navigation }) => {
   useEffect(() => {
     if (tempCategories) {
       setCategories(tempCategories);
-      setLoading(false);
+      // setLoading(false);
     }
   }, [tempCategories]);
 
@@ -209,6 +209,57 @@ const ProductList = ({ navigation }) => {
     return () => backHandler.remove();
   }, [viewMode]);
 
+  const  renderImages= (item, numberOfImages=3) =>{
+    return (
+      <>
+
+  {/* CENTER */}
+ <View
+  style={{
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  }}
+>
+  {/* ✅ First 3 images */}
+  { item.images && item?.images?.slice(0, numberOfImages).map((img, index) => (
+    <Image
+      key={index}
+      style={{
+        height: 30,
+        width: 30,
+        borderRadius: 30,
+        borderWidth: 1,
+        borderColor: appColor.grey.border,
+        marginLeft: index === 0 ? 0 : -10, // overlap
+      }}
+      source={{ uri: img }}
+    />
+  ))}
+
+  {/* ✅ 4th overlay circle */}
+  { item.images && item?.images?.length > numberOfImages && (
+    <View
+      style={{
+        height: 30,
+        width: 30,
+        borderRadius: 30,
+        backgroundColor: appColor.text.regular,
+        justifyContent: "center",
+        alignItems: "center",
+        marginLeft: -10, // overlap with 3rd
+      }}
+    >
+      <Text style={{ color: "#fff", fontSize: 10 }}>
+        +{item.images.length - numberOfImages}
+      </Text>
+    </View>
+  )}
+</View> 
+      </>
+    )
+  }
   /* ---------------- RENDER CATEGORY ---------------- */
   const renderCategoryItem = ({ item }) => {
     const percentage =
@@ -226,50 +277,9 @@ const ProductList = ({ navigation }) => {
     </Text>
   </View>
 
-  {/* CENTER */}
- <View
-  style={{
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-  }}
->
-  {/* ✅ First 3 images */}
-  { item.images && item?.images?.slice(0, 3).map((img, index) => (
-    <Image
-      key={index}
-      style={{
-        height: 30,
-        width: 30,
-        borderRadius: 30,
-        borderWidth: 1,
-        borderColor: appColor.grey.border,
-        marginLeft: index === 0 ? 0 : -10, // overlap
-      }}
-      source={{ uri: img }}
-    />
-  ))}
-
-  {/* ✅ 4th overlay circle */}
-  { item.images && item?.images?.length > 3 && (
-    <View
-      style={{
-        height: 30,
-        width: 30,
-        borderRadius: 30,
-        backgroundColor: appColor.text.regular,
-        justifyContent: "center",
-        alignItems: "center",
-        marginLeft: -10, // overlap with 3rd
-      }}
-    >
-      <Text style={{ color: "#fff", fontSize: 10 }}>
-        +{item.images.length - 3}
-      </Text>
-    </View>
-  )}
-</View> 
+      {
+        renderImages(item,3)
+      }
 
   {/* RIGHT */}
   <View style={{ flex: 1, alignItems: "flex-end" }}>
@@ -361,11 +371,17 @@ const ProductList = ({ navigation }) => {
       />
 
       <View style={{ flex: 1 }}>
-        { !authKey || loading  ? (
+        { !authKey || isLoadingCategories  ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" />
           </View>
-        ) : categories.length ===0 ? (
+        ) : error    ? (
+             <View style={{ flex: 1, alignItems: "center", marginTop: 20 }}>
+            <Text style={{ color: appColor.text.regular }}> 
+              {error && "something went wrong, contact support" }. 
+            </Text>
+          </View>
+        ): categories.length ===0 && !isLoadingCategories ? (
             <View style={styles.centerContainer}>
         <Text style={{color:appColor.text.regular}}>No categories found</Text>
       </View>
@@ -423,7 +439,7 @@ const ProductList = ({ navigation }) => {
          // boilderplate code.
           <View style={{ flex: 1, alignItems: "center", marginTop: 20 }}>
             <Text style={{ color: appColor.text.regular }}> 
-              {error && "something went wrong, contact support" ||"No Categories Found"}. 
+              {error && "something went wrong, contact support" }. 
             </Text>
           </View>
         )}

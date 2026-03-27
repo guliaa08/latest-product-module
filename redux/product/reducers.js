@@ -63,7 +63,6 @@ builder.addCase(get_categories.fulfilled, (state, action) => {
 
   const { data = [], pagination = {} } = action.payload || {};
   const currentPage = pagination?.currentPage ;
-
   
 
   if (currentPage === 1) {
