@@ -28,7 +28,7 @@ const OSARequests = ({
     }
   };
   return (
-    <Pressable onPress={handlePress}>
+    <Pressable testID="osabutton12" accessible={true} onPress={handlePress}>
       <View
         style={[
           styles.banner,
