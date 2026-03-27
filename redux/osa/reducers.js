@@ -16,6 +16,7 @@ const initialState = {
   isLoadingOsa: false,
   isLoadingPending: false,
   isLoadingScanned: false,
+  osaError:false
 };
 
 const productAppOsaSlice = createSlice({
@@ -126,30 +127,9 @@ const productAppOsaSlice = createSlice({
         state.isLoadingScanned = true;
       }
       state.isLoadingOsa = true;
+      
     });
-    //old logic
-    // builder.addCase(get_osaList.fulfilled, (state, action) => {
-    //   const { pending, scanned, requestId } = action.payload;
-
-    //   // Pending pagination
-    //   if (pending.page > state.pending.page) {
-    //     state.pending.data = [...state.pending.data, ...pending.data];
-    //     state.pending.page = pending.page;
-    //   } else {
-    //     state.pending = pending; // first load
-    //   }
-
-    //   // Scanned pagination
-    //   if (scanned.page > state.scanned.page) {
-    //     state.scanned.data = [...state.scanned.data, ...scanned.data];
-    //     state.scanned.page = scanned.page;
-    //   } else {
-    //     state.scanned = scanned; // first load
-    //   }
-
-    //   state.isLoadingOsa = false;
-    //   state.requestId = requestId;
-    // });
+   
     builder.addCase(get_osaList.fulfilled, (state, action) => {
       const { pending, scanned, requestId } = action.payload;
       const params = action.meta.arg.params;
@@ -203,6 +183,7 @@ const productAppOsaSlice = createSlice({
 
     builder.addCase(get_osaList.rejected, (state) => {
       state.isLoadingOsa = false;
+      state.osaError=true;
     });
 
     builder.addCase(post_osaList.pending, (state) => {

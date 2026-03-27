@@ -69,14 +69,7 @@ export default function Scanner({ route }) {
     }
   }, [hasPermission]);
 
-  if (!hasPermission) {
-    return (
-      <View style={styles.center}>
-        <Text>Camera permission is required</Text>
-        <Button title="Grant Permission" onPress={requestPermission} />
-      </View>
-    );
-  }
+ 
 
   const SCAN_AREA_SIZE = 200;
 
@@ -137,6 +130,14 @@ export default function Scanner({ route }) {
     );
   }
 
+   if (!hasPermission) {
+    return (
+      <View style={styles.center}>
+        <Text>Camera permission is required</Text>
+        <Button title="Grant Permission" onPress={requestPermission} />
+      </View>
+    );
+  }
   const onSave = async (item, quantity) => {
     console.log('onsave', item);
     dispatch(

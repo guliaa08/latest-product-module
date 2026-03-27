@@ -10,7 +10,7 @@ const initialState = {
   dashboardMetrics: [],
   osaRequests: [],
   isLoadingProducts: false,
-  isLoadingCategories: false,
+  isLoadingCategories: true,
   categoryPagination: {
     currentPage: 1,
     totalPages: 1,
@@ -63,7 +63,6 @@ builder.addCase(get_categories.fulfilled, (state, action) => {
 
   const { data = [], pagination = {} } = action.payload || {};
   const currentPage = pagination?.currentPage ;
-
   
 
   if (currentPage === 1) {
@@ -80,10 +79,13 @@ builder.addCase(get_categories.fulfilled, (state, action) => {
     totalCount: pagination.totalCount,
     limit: pagination.limit,
   };
+  state.error= null;
 });
 
 builder.addCase(get_categories.rejected, (state, action) => {
   state.isLoadingCategories = false;
+  console.log('reducer error',action?.error?.message);
+  
   state.error = action?.error?.message || "Failed to fetch categories";
 });
     // for active Products
